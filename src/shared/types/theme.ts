@@ -1,5 +1,10 @@
+/**
+ * Represents a theme configuration for the app
+ */
 export interface Theme {
+  /** Theme mode (light or dark) */
   mode: 'light' | 'dark';
+  /** Color palette for the theme */
   colors: {
     background: string;
     surface: string;

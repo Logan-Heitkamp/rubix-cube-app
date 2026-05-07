@@ -1,18 +1,34 @@
 import { create } from 'zustand';
 
+/**
+ * Represents an achievement that can be earned
+ */
 export interface Achievement {
+  /** Unique identifier */
   id: string;
+  /** Display name */
   name: string;
+  /** Description of the achievement */
   description: string;
+  /** Achievement tier */
   tier: 'bronze' | 'silver' | 'gold' | 'diamond';
+  /** When the achievement was earned */
   earnedAt: string;
 }
 
+/**
+ * Progress state for a user
+ */
 export interface ProgressState {
+  /** List of solve records */
   solves: SolveRecord[];
+  /** Earned achievements */
   achievements: Achievement[];
+  /** Current daily streak count */
   dailyStreak: number;
+  /** Date of last solve */
   lastSolveDate: string | null;
+  /** Skill levels for different cube solving phases */
   skillLevels: {
     cross: number;
     f2l: number;
@@ -21,29 +37,51 @@ export interface ProgressState {
   };
 }
 
+/**
+ * Record of a single solve
+ */
 export interface SolveRecord {
+  /** Unique identifier */
   id: string;
+  /** Solve time in milliseconds */
   time: number;
+  /** Date of solve */
   date: string;
+  /** Scramble used for solve */
   scramble: string;
+  /** Session identifier */
   session: string;
 }
 
+/**
+ * State management for user progress
+ */
 export interface ProgressStore {
+  /** Current progress state */
   progress: ProgressState;
+  /** List of achievements (duplicate of progress.achievements) */
   achievements: Achievement[];
+  /** Add a new solve to history */
   addSolve: (solve: SolveRecord) => void;
+  /** Mark an algorithm as completed */
   completeAlgorithm: (algorithmId: string) => void;
+  /** Increment skill level for a phase */
   incrementSkillLevel: (skill: 'cross' | 'f2l' | 'oll' | 'pll', amount?: number) => void;
+  /** Get statistics */
   getStats: () => {
     totalSolves: number;
     bestTime: number | null;
     avg5: number | null;
     avg12: number | null;
   };
+  /** Update daily streak based on last solve */
   updateDailyStreak: () => void;
 }
 
+/**
+ * Zustand store for progress tracking
+ * Manages solve history, achievements, and skill levels
+ */
 export const useProgressStore = create<ProgressStore>()((set, get) => ({
   progress: {
     solves: [],

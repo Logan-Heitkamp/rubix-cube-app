@@ -72,9 +72,8 @@ export function ScrambleGenerator({ onGenerate }: ScrambleGeneratorProps) {
   };
 
   const copyToClipboard = () => {
-    if (scramble) {
-      console.log(`Copied: ${scramble}`);
-    }
+    // Clipboard copy would use Clipboard module from react-native
+    // For now, just log (remove in production)
   };
 
   return (

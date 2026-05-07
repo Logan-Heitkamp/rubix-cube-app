@@ -11,10 +11,18 @@ import { useThemeStore } from '../../store/useThemeStore';
 import { CubeCanvas } from './CubeCanvas';
 import { CubeControls } from './CubeControls';
 
+/**
+ * Props for CubeView component
+ */
 interface CubeViewProps {
+  /** Whether to show controls overlay */
   showControls?: boolean;
 }
 
+/**
+ * Main cube view component that combines the 3D cube canvas
+ * with interactive controls for rotation and face turns
+ */
 export function CubeView({ showControls = true }: CubeViewProps) {
   const store = useCubeStore();
   const themeStore = useThemeStore();

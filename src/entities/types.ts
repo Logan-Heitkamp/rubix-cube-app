@@ -1,15 +1,28 @@
+/** Represents a single Rubik's Cube move notation */
 export type Move = string;
 
+/** Map of face names to color values */
 export type FaceColors = Record<string, string>;
 
+/**
+ * Represents the current state of the Rubik's Cube
+ */
 export interface CubeState {
+  /** Current colors of each face */
   faces: FaceColors;
+  /** Camera rotation angles */
   rotation: { x: number; y: number };
+  /** Camera zoom level */
   zoom: number;
+  /** Whether an algorithm is currently playing */
   isAlgorithmPlaying: boolean;
+  /** Currently playing algorithm (if any) */
   currentAlgorithm: AlgorithmPlayback | null;
 }
 
+/**
+ * Represents an algorithm being played back
+ */
 export interface AlgorithmPlayback {
   id: string;
   name: string;

@@ -1,11 +1,18 @@
 import { create } from 'zustand';
 import { themes } from '../shared/types/theme';
 
+/** Theme mode type */
 export type ThemeMode = 'light' | 'dark';
 
+/**
+ * State for theme management
+ */
 interface ThemeState {
+  /** Current theme mode */
   mode: ThemeMode;
+  /** Toggle between light and dark themes */
   toggleTheme: () => void;
+  /** Current color palette */
   colors: {
     background: string;
     surface: string;
@@ -16,6 +23,10 @@ interface ThemeState {
   };
 }
 
+/**
+ * Zustand store for theme management
+ * Provides light/dark theme switching
+ */
 export const useThemeStore = create<ThemeState>()((set) => ({
   mode: 'light',
   colors: themes.light.colors,

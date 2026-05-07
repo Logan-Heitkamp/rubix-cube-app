@@ -1,17 +1,32 @@
 import { create } from 'zustand';
 import { CubeState, FaceColors, INITIAL_FACE_COLORS, FACE_ROTATIONS, Move } from '../entities/types';
 
+/**
+ * State management for the Rubik's Cube
+ */
 interface CubeStore {
+  /** Current cube state */
   state: CubeState;
+  /** Dispatch actions to update cube state */
   dispatch: (action: { type: string; payload?: FaceColors | { x: number; y: number }; move?: string }) => void;
+  /** Reset cube to initial state */
   resetCube: () => void;
+  /** Rotate cube to specific angles */
   rotateFace: (x: number, y: number) => void;
+  /** Set camera zoom level */
   setZoom: (zoom: number) => void;
+  /** Start playing an algorithm */
   startAlgorithm: (id: string, name: string, moves: Move[]) => void;
+  /** Stop algorithm playback */
   stopAlgorithm: () => void;
+  /** Mark an algorithm as complete */
   markAlgorithmComplete: (algorithmId: string) => void;
 }
 
+/**
+ * Zustand store for cube state management
+ * Handles cube rotation, zoom, and algorithm playback
+ */
 export const useCubeStore = create<CubeStore>()((set, get) => ({
   state: {
     faces: INITIAL_FACE_COLORS,

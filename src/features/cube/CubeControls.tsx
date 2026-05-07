@@ -21,7 +21,7 @@ export function CubeControls({ showRotation = false }: CubeControlsProps) {
 
   const faces = state.faces;
 
-  console.log('CubeControls rendering');
+  // Debug: Remove in production
  const handleFaceMove = (face: string, modifier: '' | "'" | '2' = '') => {
     dispatch({
       type: 'MOVE_FACE',

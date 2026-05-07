@@ -18,8 +18,7 @@ export default function App() {
   const toggleTheme = themeStore.toggleTheme;
   const [activeTab, setActiveTab] = useState<Tab>('cube');
 
-  console.log('App rendering');
-
+ 
   const tabs = [
     { id: 'cube', label: 'Cube', icon: '🧩' },
     { id: 'algorithms', label: 'Algorithms', icon: '📚' },
