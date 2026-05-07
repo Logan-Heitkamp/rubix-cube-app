@@ -36,6 +36,9 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# npm lock file (optional to commit)
+package-lock.json
+
 # generated native folders
 /ios
 /android
