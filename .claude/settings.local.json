@@ -8,7 +8,10 @@
       "Bash(npx tsc *)",
       "Bash(npm start *)",
       "Bash(curl -s http://localhost:8081)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git stash *)",
+      "Bash(git merge *)"
     ]
   }
 }
