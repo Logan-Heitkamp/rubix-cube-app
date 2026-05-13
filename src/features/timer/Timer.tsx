@@ -4,11 +4,12 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
 } from 'react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useCubeStore } from '../../store/useCubeStore';
 import { useProgressStore } from '../../store/useProgressStore';
+import { Stats } from './components/Stats';
+import { History } from './components/History';
 
 type TimerState = 'idle' | 'inspecting' | 'timing' | 'result';
 
@@ -27,10 +28,22 @@ export function Timer() {
   const [lastScramble, setLastScramble] = useState('');
 
   const startTimeRef = useRef<number | null>(null);
-  const inspectionRef = useRef<any | null>(null);
-  const timerRef = useRef<any | null>(null);
+  const inspectionRef = useRef<number | null>(null);
+  const timerRef = useRef<number | null>(null);
 
   const stats = useMemo(() => getStats(), [getStats]);
+
+  const formatTime = useMemo(() => (ms: number) => {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    const milliseconds = ms % 1000;
+
+    if (minutes > 0) {
+      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+    }
+    return `${remainingSeconds}.${milliseconds.toString().padStart(3, '0')}`;
+  }, []);
 
   const startInspection = useCallback(() => {
     setTimerState('inspecting');
@@ -62,10 +75,8 @@ export function Timer() {
     setTime(elapsedTime);
     setTimerState('result');
 
-    // Add to history
     setSolveHistory((prev) => [elapsedTime, ...prev].slice(0, 100));
 
-    // Save to progress
     addSolve({
       id: crypto.randomUUID(),
       time: elapsedTime,
@@ -83,7 +94,6 @@ export function Timer() {
         startInspection();
       } else if (timerState === 'inspecting') {
         if (inspectionTime > 0) {
-          // DNF - inspection time exceeded
           if (inspectionRef.current) clearInterval(inspectionRef.current);
           setTimerState('result');
           setTime(INSPECTION_TIME * 1000 + 1);
@@ -121,18 +131,6 @@ export function Timer() {
     setInspectionTime(INSPECTION_TIME);
   };
 
-  const formatTime = (ms: number) => {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    const milliseconds = ms % 1000;
-
-    if (minutes > 0) {
-      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
-    }
-    return `${remainingSeconds}.${milliseconds.toString().padStart(3, '0')}`;
-  };
-
   const generateScramble = () => {
     const faces = ['U', 'D', 'F', 'B', 'L', 'R'];
     const modifiers = ['', "'", '2'];
@@ -161,7 +159,6 @@ export function Timer() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={[styles.title, { color: theme.text }]}>
           Speed Timer
@@ -176,7 +173,6 @@ export function Timer() {
         </TouchableOpacity>
       </View>
 
-      {/* Scramble Display */}
       {lastScramble && (
         <View style={[styles.scrambleBox, { backgroundColor: theme.surface }]}>
           <Text style={[styles.scrambleText, { color: theme.textSecondary }]}>
@@ -185,7 +181,6 @@ export function Timer() {
         </View>
       )}
 
-      {/* Timer Display */}
       <View style={styles.timerContainer}>
         {timerState === 'inspecting' ? (
           <View style={[styles.inspectionDisplay, { borderColor: inspectionTime <= 3 ? '#ef4444' : theme.primary }]}>
@@ -215,43 +210,14 @@ export function Timer() {
         )}
       </View>
 
-      {/* Stats */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
-            Best
-          </Text>
-          <Text style={[styles.statValue, { color: theme.text }]}>
-            {stats.bestTime ? formatTime(stats.bestTime) : '--'}
-          </Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
-            Ao5
-          </Text>
-          <Text style={[styles.statValue, { color: theme.text }]}>
-            {stats.avg5 ? formatTime(stats.avg5) : '--'}
-          </Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
-            Ao12
-          </Text>
-          <Text style={[styles.statValue, { color: theme.text }]}>
-            {stats.avg12 ? formatTime(stats.avg12) : '--'}
-          </Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
-            Total
-          </Text>
-          <Text style={[styles.statValue, { color: theme.text }]}>
-            {stats.totalSolves}
-          </Text>
-        </View>
-      </View>
+      <Stats
+        bestTime={stats.bestTime}
+        avg5={stats.avg5}
+        avg12={stats.avg12}
+        totalSolves={stats.totalSolves}
+        formatTime={formatTime}
+      />
 
-      {/* Controls */}
       <View style={styles.controls}>
         {timerState === 'result' ? (
           <TouchableOpacity
@@ -269,33 +235,12 @@ export function Timer() {
         )}
       </View>
 
-      {/* History */}
       {solveHistory.length > 0 && (
-        <View style={styles.historyContainer}>
-          <Text style={[styles.historyTitle, { color: theme.textSecondary }]}>
-            Recent Solves
-          </Text>
-          <View style={styles.historyList}>
-            {solveHistory.slice(0, 5).map((solveTime, index) => (
-              <View
-                key={index}
-                style={[styles.historyItem, { backgroundColor: theme.surface }]}
-              >
-                <Text style={[styles.historyNumber, { color: theme.textSecondary }]}>
-                  #{solveHistory.length - index}
-                </Text>
-                <Text
-                  style={[
-                    styles.historyTime,
-                    { color: solveTime === stats.bestTime ? '#22c55e' : theme.text },
-                  ]}
-                >
-                  {formatTime(solveTime)}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
+        <History
+          history={solveHistory}
+          bestTime={stats.bestTime}
+          formatTime={formatTime}
+        />
       )}
     </View>
   );
@@ -368,24 +313,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: 'monospace',
   },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    marginBottom: 4,
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
   controls: {
     alignItems: 'center',
   },
@@ -404,34 +331,6 @@ const styles = StyleSheet.create({
   resetButtonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: '600',
-  },
-  historyContainer: {
-    marginTop: 16,
-  },
-  historyTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    marginBottom: 8,
-  },
-  historyList: {
-    gap: 8,
-  },
-  historyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
-  },
-  historyNumber: {
-    fontSize: 10,
-    fontWeight: '600',
-    marginRight: 12,
-    width: 24,
-  },
-  historyTime: {
-    fontSize: 16,
     fontWeight: '600',
   },
 });

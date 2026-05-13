@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout *)",
+      "Bash(npm install *)",
+      "Bash(npm test *)",
+      "Bash(npm run *)",
+      "Bash(npx tsc *)",
+      "Bash(npm start *)",
+      "Bash(curl -s http://localhost:8081)",
+      "Bash(git add *)"
+    ]
+  }
+}

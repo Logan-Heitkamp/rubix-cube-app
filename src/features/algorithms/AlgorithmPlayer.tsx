@@ -10,6 +10,7 @@ import {
 import { useThemeStore } from '../../store/useThemeStore';
 import { useCubeStore } from '../../store/useCubeStore';
 import { Algorithm } from './algorithmTypes';
+import { Toast } from '../../shared/components/Toast';
 
 interface AlgorithmPlayerProps {
   algorithm: Algorithm;
@@ -99,6 +100,12 @@ export function AlgorithmPlayer({ algorithm, onClose }: AlgorithmPlayerProps) {
     return inverted.reverse().join(' ');
   };
 
+  const [toastMessage, setToastMessage] = React.useState<string | null>(null);
+
+  const handleInvert = () => {
+    setToastMessage(`Inverted: ${invertNotation()}`);
+  };
+
   return (
     <Modal
       visible={true}
@@ -135,7 +142,7 @@ export function AlgorithmPlayer({ algorithm, onClose }: AlgorithmPlayerProps) {
             </Text>
             <TouchableOpacity
               style={[styles.invertButton, { backgroundColor: theme.primary }]}
-              onPress={() => alert(`Inverted: ${invertNotation()}`)}
+              onPress={handleInvert}
             >
               <Text style={styles.invertButtonText}>Invert</Text>
             </TouchableOpacity>
@@ -202,6 +209,13 @@ export function AlgorithmPlayer({ algorithm, onClose }: AlgorithmPlayerProps) {
             </Text>
           </View>
         </View>
+
+        <Toast
+          message={toastMessage || ''}
+          visible={!!toastMessage}
+          onClose={() => setToastMessage(null)}
+          type="info"
+        />
       </View>
     </Modal>
   );

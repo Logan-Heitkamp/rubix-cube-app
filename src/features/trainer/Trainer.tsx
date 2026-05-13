@@ -9,7 +9,8 @@ import {
 import { useThemeStore } from '../../store/useThemeStore';
 import { useCubeStore } from '../../store/useCubeStore';
 import { useProgressStore } from '../../store/useProgressStore';
-import { OLL_ALGORITHMS, PLL_ALGORITHMS, F2L_ALGORITHMS } from '../algorithms/algorithmData/algorithms';
+import { OLL_ALGORITHMS, PLL_ALGORITHMS, F2L_ALGORITHMS } from '../algorithms/algorithmDefinitions/algorithms';
+import { Toast } from '../../shared/components/Toast';
 
 type TrainerMode = 'practice' | 'check' | 'hint';
 
@@ -31,6 +32,8 @@ export function Trainer() {
   const [mode, setMode] = useState<TrainerMode>('practice');
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<Algorithm | null>(null);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('info');
 
   const allAlgorithms: Algorithm[] = [
     ...OLL_ALGORITHMS,
@@ -58,14 +61,18 @@ export function Trainer() {
       }
     } else {
       // Wrong move - show hint
-      alert(`Wrong move! Expected: ${expectedMove}`);
+      setToastMessage(`Wrong move! Expected: ${expectedMove}`);
+      setToastType('error');
+      setTimeout(() => setToastMessage(null), 3000);
     }
   };
 
   const getHint = () => {
     if (!selectedAlgorithm) return;
     const nextMove = selectedAlgorithm.moves[currentMoveIndex];
-    alert(`Hint: The next move is ${nextMove}`);
+    setToastMessage(`Hint: The next move is ${nextMove}`);
+    setToastType('info');
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const resetAlgorithm = () => {
@@ -213,6 +220,14 @@ export function Trainer() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Toast Notification */}
+      <Toast
+        message={toastMessage || ''}
+        visible={!!toastMessage}
+        onClose={() => setToastMessage(null)}
+        type={toastType}
+      />
     </ScrollView>
   );
 }

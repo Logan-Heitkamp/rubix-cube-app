@@ -1,12 +1,4 @@
-export interface Algorithm {
-  id: string;
-  name: string;
-  description: string;
-  notation: string;
-  category: 'oll' | 'pll' | 'f2l';
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  moves: string[];
-}
+import { Algorithm } from '../algorithmTypes';
 
 export const OLL_ALGORITHMS: Algorithm[] = [
   {
