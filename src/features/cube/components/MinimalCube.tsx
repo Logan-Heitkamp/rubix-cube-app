@@ -35,7 +35,7 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000); // Black background (CSS shows through)
+    scene.background = new THREE.Color('#e0e0e0'); // Light grey background
     sceneRef.current = scene;
 
     // Get actual container dimensions for proper aspect ratio
@@ -259,7 +259,6 @@ const canvasStyle: React.CSSProperties = {
   height: '100%',
   overflow: 'hidden',
   cursor: 'grab',
-  backgroundColor: 'transparent',
 };
 
 const styles = StyleSheet.create({
@@ -267,9 +266,5 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
-    backgroundImage: 'url(/cube_background.jpg)',
-    backgroundSize: 'contain',
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'center',
   },
 });
