@@ -50,8 +50,8 @@ interface CubeStore {
 export const useCubeStore = create<CubeStore>()((set, get) => ({
   state: {
     faces: INITIAL_FACE_COLORS,
-    rotation: { x: 90, y: 0 },
-    zoom: 25,
+    rotation: { x: 45, y: 45 },
+    zoom: 40,
     isAlgorithmPlaying: false,
     isAnimating: false,
     currentAlgorithm: null,
