@@ -31,6 +31,10 @@ interface CubeStore {
   scene: THREE.Scene | null;
   /** Set the scene for face turning animations */
   setScene: (scene: THREE.Scene) => void;
+  /** Set animation state */
+  setIsAnimating: (isAnimating: boolean) => void;
+  /** Is animation currently running */
+  isAnimating: boolean;
   /** Start playing an algorithm */
   startAlgorithm: (id: string, name: string, moves: Move[]) => void;
   /** Stop algorithm playback */
@@ -49,6 +53,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     rotation: { x: -25, y: 45 },
     zoom: 15,
     isAlgorithmPlaying: false,
+    isAnimating: false,
     currentAlgorithm: null,
   },
   cubies: [] as THREE.Mesh[],
@@ -61,6 +66,11 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     set(() => ({
       scene,
     })),
+  setIsAnimating: (isAnimating) =>
+    set(() => ({
+      isAnimating,
+    })),
+  isAnimating: false,
   dispatch: (action) => {
     const { state } = get();
     if (action.type === 'MOVE_FACE' && action.payload && action.move) {
@@ -120,9 +130,21 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     })),
   // Helper function to turn a face
   turnFace: (axis, direction, slice = 0, angle = 90, onComplete?) => {
-    const { cubies, scene } = get();
+    const { cubies, scene, isAnimating } = get();
+
+    // Prevent new animations if one is already running
+    if (isAnimating) {
+      console.log('turnFace: Animation already in progress, ignoring');
+      onComplete?.();
+      return;
+    }
+
+    // Set animating flag
+    set({ isAnimating: true });
+
     if (cubies.length === 0 || !scene) {
       console.log('turnFaceInternal: No cubies or scene');
+      set({ isAnimating: false });
       onComplete?.();
       return;
     }
@@ -146,6 +168,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
 
     if (sliceCubies.length === 0) {
       console.log('  No cubies found, returning');
+      set({ isAnimating: false });
       onComplete?.();
       return;
     }
@@ -212,6 +235,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         });
 
         scene.remove(parentGroup);
+        set({ isAnimating: false });
         onComplete?.();
       }
     };
@@ -220,9 +244,20 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
   },
   // Helper function to turn entire cube (x, y, z moves)
   turnFaceWholeCube: (move: CubeMove, onComplete?: () => void) => {
-    const { cubies, scene } = get();
+    const { cubies, scene, isAnimating } = get();
+
+    // Prevent new animations if one is already running
+    if (isAnimating) {
+      console.log('turnFaceWholeCube: Animation already in progress, ignoring');
+      onComplete?.();
+      return;
+    }
+
+    set({ isAnimating: true });
+
     if (cubies.length === 0 || !scene) {
       console.log('turnFaceWholeCube: No cubies or scene');
+      set({ isAnimating: false });
       onComplete?.();
       return;
     }
@@ -294,6 +329,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         });
 
         scene.remove(parentGroup);
+        set({ isAnimating: false });
         onComplete?.();
       }
     };
@@ -302,9 +338,20 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
   },
   // Helper function to turn 2 layers (wide turn)
   turnWideFace: (axis, direction, slice, angle = 90, onComplete?) => {
-    const { cubies, scene } = get();
+    const { cubies, scene, isAnimating } = get();
+
+    // Prevent new animations if one is already running
+    if (isAnimating) {
+      console.log('turnWideFace: Animation already in progress, ignoring');
+      onComplete?.();
+      return;
+    }
+
+    set({ isAnimating: true });
+
     if (cubies.length === 0 || !scene) {
       console.log('turnWideFace: No cubies or scene');
+      set({ isAnimating: false });
       onComplete?.();
       return;
     }
@@ -321,6 +368,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
 
     if (sliceCubies.length === 0) {
       console.log('  No cubies found, returning');
+      set({ isAnimating: false });
       onComplete?.();
       return;
     }
@@ -387,6 +435,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         });
 
         scene.remove(parentGroup);
+        set({ isAnimating: false });
         onComplete?.();
       }
     };
