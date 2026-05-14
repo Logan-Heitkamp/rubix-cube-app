@@ -45,7 +45,7 @@ export function CubeView({
     resetCube();
 
     // Apply all setup moves immediately (no animation)
-    if (setupMovesInput.trim()) {
+    if (setupMovesInput && setupMovesInput.trim()) {
       const moves = setupMovesInput.trim().split(/\s+/).filter(m => m.length > 0);
       moves.forEach((move) => {
         turnMove(move);
