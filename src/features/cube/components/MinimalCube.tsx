@@ -141,6 +141,17 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
 
       // Use sceneRef.current to ensure we're rendering the correct scene
       if (sceneRef.current && cameraRef.current && rendererRef.current) {
+        // Log scene info for debugging
+        // @ts-ignore - debugging property on window
+        if (window.cubeSceneDebug === undefined) {
+          // @ts-ignore
+          window.cubeSceneDebug = {
+            loopScene: sceneRef.current,
+            loopCamera: cameraRef.current,
+            setupScene: null,
+          };
+          console.log('MinimalCube: Loop using scene', sceneRef.current.uuid);
+        }
         rendererRef.current.render(sceneRef.current, cameraRef.current);
       }
     };

@@ -779,6 +779,11 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
   applyMovesToCubies: (moves, onComplete?) => {
     const { cubies, scene, isAnimating } = get();
 
+    console.log('applyMovesToCubies: Cubies count', cubies.length);
+    if (scene) {
+      console.log('applyMovesToCubies: Using scene', scene.uuid);
+    }
+
     // Prevent new animations if one is already running
     if (isAnimating) {
       console.log('applyMovesToCubies: Animation already in progress, ignoring');
