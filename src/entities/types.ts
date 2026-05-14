@@ -7,6 +7,20 @@ export type RotationAxis = 'x' | 'y' | 'z';
 /** Map of face names to color values */
 export type FaceColors = Record<string, string>;
 
+/** Position of a cubie */
+export interface CubiePosition {
+  x: number;
+  y: number;
+  z: number;
+}
+
+/** Rotation of a cubie */
+export interface CubieRotation {
+  x: number;
+  y: number;
+  z: number;
+}
+
 /**
  * Represents the current state of the Rubik's Cube
  */
@@ -27,6 +41,9 @@ export interface CubeState {
   algorithmMoves: string;
   /** Current move index in algorithm playback */
   currentMoveIndex: number;
+  /** Cubie positions and rotations */
+  cubiePositions: CubiePosition[];
+  cubieRotations: CubieRotation[];
 }
 
 /**
