@@ -13,7 +13,10 @@
       "Bash(git stash *)",
       "Bash(git merge *)",
       "Bash(git push *)",
-      "WebFetch(domain:alg.cubing.net)"
+      "WebFetch(domain:alg.cubing.net)",
+      "Bash(git show *)",
+      "Read(//tmp/**)",
+      "Bash(git pull *)"
     ]
   }
 }

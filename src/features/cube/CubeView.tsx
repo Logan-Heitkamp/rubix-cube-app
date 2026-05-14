@@ -13,7 +13,7 @@ import { MinimalCube } from './components/MinimalCube';
 import { CubeRotationControls } from './components/CubeRotationControls';
 import { SplitView } from './components/SplitView';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface CubeViewProps {
   showControls?: boolean;
@@ -33,29 +33,32 @@ export function CubeView({
   const rotateFace = (x: number, y: number) => store.rotateFace(x, y);
   const setZoom = (zoom: number) => store.setZoom(zoom);
 
+  // Use refs for drag state to avoid re-renders
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
   const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
-        setIsDragging(true);
+        isDraggingRef.current = true;
+        dragStartRef.current = { x: touchStart.x, y: touchStart.y };
       },
       onPanResponderMove: (_, gesture) => {
-        if (!isDragging) return;
+        if (!isDraggingRef.current) return;
 
         const deltaX = gesture.dx;
         const deltaY = gesture.dy;
 
-        const sensitivity = 0.5;
+        const sensitivity = 0.3;
         rotateFace(
           state.rotation.x - deltaY * sensitivity,
           state.rotation.y + deltaX * sensitivity
         );
       },
       onPanResponderRelease: () => {
-        setIsDragging(false);
+        isDraggingRef.current = false;
       },
       onPanResponderTerminationRequest: () => true,
     })
@@ -70,14 +73,14 @@ export function CubeView({
     <View style={styles.cubeContainer}>
       <MinimalCube />
 
-      {/* Rotation controls */}
+      {/* Rotation controls - positioned at bottom left */}
       {showRotationControls && (
         <View style={styles.rotationControlsContainer}>
           <CubeRotationControls onReset={resetRotation} />
         </View>
       )}
 
-      {/* Zoom controls */}
+      {/* Zoom controls - positioned at top left */}
       {showControls && (
         <View style={styles.zoomContainer}>
           <TouchableOpacity
@@ -115,7 +118,7 @@ export function CubeView({
   );
 
   return (
-    <SplitView left={cubeContent} right={rightContent} leftWidth={SCREEN_WIDTH / 2} rightWidth={SCREEN_WIDTH / 2} />
+    <SplitView left={cubeContent} right={rightContent} />
   );
 }
 
@@ -125,6 +128,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rightPane: {
     flex: 1,
@@ -133,50 +138,50 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
   },
   emptyState: {
-    padding: 20,
     alignItems: 'center',
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
     marginBottom: 8,
   },
   emptySubtext: {
-    fontSize: 12,
+    fontSize: 14,
     textAlign: 'center',
   },
   rotationControlsContainer: {
     position: 'absolute',
-    bottom: 16,
-    left: 16,
+    bottom: 24,
+    left: 24,
     zIndex: 10,
   },
   zoomContainer: {
     position: 'absolute',
-    top: 16,
-    left: 16,
+    top: 24,
+    left: 24,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     zIndex: 10,
   },
   zoomButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
   zoomText: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   zoomLabel: {
     fontSize: 12,
     fontWeight: '600',
-    minWidth: 30,
+    minWidth: 40,
     textAlign: 'center',
   },
 });

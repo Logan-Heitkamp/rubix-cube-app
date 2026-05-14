@@ -14,10 +14,13 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
   const state = store.state;
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
-  const cameraRef = useRef<THREE.Camera | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cubesRef = useRef<THREE.Mesh[]>([]);
-  const initialRotationRef = useRef<THREE.Euler>(new THREE.Euler(0, 0, 0, 'YXZ'));
+  const edgeLinesRef = useRef<THREE.LineSegments | null>(null);
+  // Use refs to track rotation without causing re-renders
+  const rotationRef = useRef({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -27,30 +30,36 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
     scene.background = new THREE.Color('#0f172a'); // Dark background
     sceneRef.current = scene;
 
-    // Camera setup - slightly angled for 3D effect
-    const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 100);
-    camera.position.set(4, 3, 5);
+    // Get actual container dimensions for proper aspect ratio
+    const containerWidth = containerRef.current.clientWidth;
+    const containerHeight = containerRef.current.clientHeight;
+
+    // Camera setup - positioned for left half view with slight angle
+    const camera = new THREE.PerspectiveCamera(35, containerWidth / containerHeight, 0.1, 100);
+    // Position camera to the left and up for a good viewing angle
+    camera.position.set(-2, 2, 6);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
     // Renderer setup
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(width, height);
+    renderer.setSize(containerWidth, containerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     rendererRef.current = renderer;
     containerRef.current.appendChild(renderer.domElement);
 
-    // Lighting - minimal setup
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    // Lighting - minimal setup for clean look
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
     directionalLight.position.set(5, 10, 7);
     scene.add(directionalLight);
 
     // Create 27 cubies with clean materials
     const cubies: THREE.Mesh[] = [];
-    const geometry = new THREE.BoxGeometry(0.9, 0.9, 0.9);
+    // Use slightly smaller geometry to create visible edges
+    const geometry = new THREE.BoxGeometry(0.92, 0.92, 0.92);
 
     // Standard Rubik's colors
     const colors = {
@@ -60,20 +69,20 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
       red: '#ef4444',
       green: '#22c55e',
       blue: '#3b82f6',
-      internal: '#111827', // Very dark gray
+      internal: '#000000', // Black for edges
     };
 
     for (let x = -1; x <= 1; x++) {
       for (let y = -1; y <= 1; y++) {
         for (let z = -1; z <= 1; z++) {
-          // Determine colors for each face based on position
+          // Materials order for BoxGeometry: Right, Left, Top, Bottom, Front, Back
           const materials = [
-            new THREE.MeshBasicMaterial({ color: x === -1 ? colors.orange : colors.internal }), // Left
             new THREE.MeshBasicMaterial({ color: x === 1 ? colors.red : colors.internal }),    // Right
-            new THREE.MeshBasicMaterial({ color: y === 1 ? colors.white : colors.internal }),  // Top
+            new THREE.MeshBasicMaterial({ color: x === -1 ? colors.orange : colors.internal }), // Left
+            new THREE.MeshBasicMaterial({ color: y === 1 ? colors.white : colors.internal }),   // Top
             new THREE.MeshBasicMaterial({ color: y === -1 ? colors.yellow : colors.internal }), // Bottom
-            new THREE.MeshBasicMaterial({ color: z === 1 ? colors.green : colors.internal }),  // Front
-            new THREE.MeshBasicMaterial({ color: z === -1 ? colors.blue : colors.internal }),  // Back
+            new THREE.MeshBasicMaterial({ color: z === 1 ? colors.green : colors.internal }),   // Front
+            new THREE.MeshBasicMaterial({ color: z === -1 ? colors.blue : colors.internal }),   // Back
           ];
 
           const cube = new THREE.Mesh(geometry, materials);
@@ -85,26 +94,36 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
     }
     cubesRef.current = cubies;
 
-    // Store initial rotation for reference
-    initialRotationRef.current.copy(camera.rotation);
+    // Add black edge lines between colored faces
+    const edgeGeometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(3, 3, 3));
+    const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+    const edgeLines = new THREE.LineSegments(edgeGeometry, edgeMaterial);
+    edgeLinesRef.current = edgeLines;
+    scene.add(edgeLines);
 
-    // Grid (optional, minimal)
-    if (showGrid) {
-      const gridHelper = new THREE.GridHelper(6, 6, 0x374151, 0x1f2937);
-      gridHelper.position.y = -1;
-      scene.add(gridHelper);
-    }
+    // Store initial rotation values
+    rotationRef.current = { x: state.rotation.x, y: state.rotation.y };
 
     // Animation loop
     let animationId: number;
     const animate = () => {
       animationId = requestAnimationFrame(animate);
 
-      // Update camera position based on state rotation
-      if (cameraRef.current) {
-        // Apply rotation to camera
-        cameraRef.current.position.x = 4 + state.rotation.y * 0.05;
-        cameraRef.current.position.y = 3 - state.rotation.x * 0.05;
+      // Sync rotation from store without triggering re-renders
+      if (rotationRef.current.x !== state.rotation.x || rotationRef.current.y !== state.rotation.y) {
+        rotationRef.current = { x: state.rotation.x, y: state.rotation.y };
+      }
+
+      // Rotate camera around the cube using spherical coordinates
+      if (cameraRef.current && rendererRef.current) {
+        const radius = 7;
+        const angleX = (rotationRef.current.x * Math.PI) / 180;
+        const angleY = (rotationRef.current.y * Math.PI) / 180;
+
+        // Position camera using spherical coordinates
+        cameraRef.current.position.x = radius * Math.sin(angleY) * Math.cos(angleX);
+        cameraRef.current.position.y = radius * Math.sin(angleX);
+        cameraRef.current.position.z = radius * Math.cos(angleY) * Math.cos(angleX);
         cameraRef.current.lookAt(0, 0, 0);
       }
 
@@ -114,11 +133,16 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
 
     // Handle resize
     const handleResize = () => {
-      const newWidth = containerRef.current?.clientWidth || width;
-      const newHeight = containerRef.current?.clientHeight || height;
-      camera.aspect = newWidth / newHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(newWidth, newHeight);
+      if (!containerRef.current) return;
+      const newWidth = containerRef.current.clientWidth;
+      const newHeight = containerRef.current.clientHeight;
+      if (cameraRef.current) {
+        cameraRef.current.aspect = newWidth / newHeight;
+        cameraRef.current.updateProjectionMatrix();
+      }
+      if (rendererRef.current) {
+        rendererRef.current.setSize(newWidth, newHeight);
+      }
     };
     window.addEventListener('resize', handleResize);
 

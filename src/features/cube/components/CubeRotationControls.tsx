@@ -14,51 +14,58 @@ export function CubeRotationControls({ onReset, style }: CubeRotationControlsPro
   const store = useCubeStore();
   const rotateFace = store.rotateFace;
 
+  // Corner view rotations
   const rotateViews = {
-    front: { x: 0, y: 0 },
-    right: { x: 0, y: 90 },
-    back: { x: 0, y: 180 },
-    left: { x: 0, y: -90 },
     top: { x: -90, y: 0 },
     bottom: { x: 90, y: 0 },
+    front: { x: 0, y: 0 },
+    back: { x: 0, y: 180 },
   };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.surface }, style]}>
       <View style={styles.row}>
+        {/* Top-Left: Top view */}
         <RotationButton
           label="↑"
+          tooltip="Top"
           onClick={() => rotateFace(rotateViews.top.x, rotateViews.top.y)}
           theme={theme}
         />
+        {/* Top-Right: Back view */}
         <RotationButton
-          label="F"
-          onClick={() => rotateFace(rotateViews.front.x, rotateViews.front.y)}
-          theme={theme}
-        />
-        <RotationButton
-          label="↓"
-          onClick={() => rotateFace(rotateViews.bottom.x, rotateViews.bottom.y)}
+          label="↺"
+          tooltip="Back"
+          onClick={() => rotateFace(rotateViews.back.x, rotateViews.back.y)}
           theme={theme}
         />
       </View>
       <View style={styles.row}>
+        {/* Bottom-Left: Front view */}
         <RotationButton
-          label="←"
-          onClick={() => rotateFace(rotateViews.left.x, rotateViews.left.y)}
+          label="F"
+          tooltip="Front"
+          onClick={() => rotateFace(rotateViews.front.x, rotateViews.front.y)}
           theme={theme}
         />
+        {/* Bottom-Right: Bottom view */}
         <RotationButton
-          label="R"
-          onClick={() => rotateFace(rotateViews.right.x, rotateViews.right.y)}
+          label="↓"
+          tooltip="Bottom"
+          onClick={() => rotateFace(rotateViews.bottom.x, rotateViews.bottom.y)}
           theme={theme}
         />
-        <RotationButton
-          label="Reset"
-          onClick={onReset || undefined}
-          theme={theme}
-          variant="reset"
-        />
+      </View>
+      {/* Reset button below */}
+      <View style={styles.resetRow}>
+        <TouchableOpacity
+          style={[styles.resetButton, { backgroundColor: theme.border }]}
+          onPress={onReset}
+        >
+          <Text style={[styles.resetText, { color: theme.textSecondary }]}>
+            Reset
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -66,22 +73,21 @@ export function CubeRotationControls({ onReset, style }: CubeRotationControlsPro
 
 interface RotationButtonProps {
   label: string;
+  tooltip?: string;
   onClick?: () => void;
   theme: any;
-  variant?: 'default' | 'reset';
 }
 
-function RotationButton({ label, onClick, theme, variant = 'default' }: RotationButtonProps) {
+function RotationButton({ label, onClick, theme }: RotationButtonProps) {
   return (
     <TouchableOpacity
       style={[
         styles.button,
         { backgroundColor: theme.primary },
-        variant === 'reset' && { backgroundColor: theme.border },
       ]}
       onPress={onClick}
     >
-      <Text style={[styles.label, { color: variant === 'reset' ? theme.text : '#fff' }]}>
+      <Text style={[styles.label, { color: '#fff' }]}>
         {label}
       </Text>
     </TouchableOpacity>
@@ -91,24 +97,37 @@ function RotationButton({ label, onClick, theme, variant = 'default' }: Rotation
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
-    gap: 4,
-    padding: 8,
-    borderRadius: 8,
+    gap: 6,
+    padding: 10,
+    borderRadius: 12,
   },
   row: {
     flexDirection: 'row',
-    gap: 4,
+    gap: 6,
     justifyContent: 'center',
   },
+  resetRow: {
+    justifyContent: 'center',
+    marginTop: 4,
+  },
   button: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  resetButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
   label: {
-    fontSize: 12,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  resetText: {
+    fontSize: 11,
     fontWeight: '600',
   },
 });
