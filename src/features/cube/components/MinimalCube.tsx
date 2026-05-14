@@ -35,7 +35,11 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#f0f0f0'); // Light grey background
+
+    // Load background image
+    const textureLoader = new THREE.TextureLoader();
+    const backgroundTexture = textureLoader.load('/cube_background.jpg');
+    scene.background = backgroundTexture;
     sceneRef.current = scene;
 
     // Get actual container dimensions for proper aspect ratio
