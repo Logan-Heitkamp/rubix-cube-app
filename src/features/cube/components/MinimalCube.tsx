@@ -106,7 +106,6 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
     }
     cubesRef.current = cubies;
 
-    console.log('MinimalCube: Registering', cubies.length, 'cubies with store');
     // Register cubies and scene with store for face turning
     store.setCubies(cubies);
     store.setScene(scene);
@@ -140,7 +139,10 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
         cameraRef.current.lookAt(0, 0, 0);
       }
 
-      renderer.render(scene, camera);
+      // Use sceneRef.current to ensure we're rendering the correct scene
+      if (sceneRef.current && cameraRef.current && rendererRef.current) {
+        rendererRef.current.render(sceneRef.current, cameraRef.current);
+      }
     };
     animate();
 

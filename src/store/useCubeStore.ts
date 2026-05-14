@@ -87,6 +87,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     set(() => ({
       scene,
     })),
+  getScene: () => get().scene,
   setIsAnimating: (isAnimating) =>
     set(() => ({
       isAnimating,
@@ -778,9 +779,6 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
   applyMovesToCubies: (moves, onComplete?) => {
     const { cubies, scene, isAnimating } = get();
 
-    console.log('applyMovesToCubies called with moves:', moves);
-    console.log('Number of cubies:', cubies.length);
-
     // Prevent new animations if one is already running
     if (isAnimating) {
       console.log('applyMovesToCubies: Animation already in progress, ignoring');
@@ -801,27 +799,18 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     // Apply each move directly without animation
     moves.forEach((moveNotation) => {
       const move = parseMove(moveNotation);
-      if (!move) {
-        console.log(`applyMovesToCubies: Invalid move ${moveNotation}, skipping`);
-        return;
-      }
+      if (!move) return;
 
       // Find cubies in the slice
       const sliceCubies = cubies.filter((cube) => {
-        const matches = (
+        return (
           (move.axis === 'x' && Math.round(cube.position.x) === move.slice) ||
           (move.axis === 'y' && Math.round(cube.position.y) === move.slice) ||
           (move.axis === 'z' && Math.round(cube.position.z) === move.slice)
         );
-        return matches;
       });
 
-      console.log(`Move ${moveNotation}: Found ${sliceCubies.length} cubies in slice ${move.slice}`);
-
-      if (sliceCubies.length === 0) {
-        console.log(`applyMovesToCubies: No cubies found for move ${moveNotation}, stopping`);
-        return;
-      }
+      if (sliceCubies.length === 0) return;
 
       // Create a temporary parent group at the origin
       const parentGroup = new THREE.Group();
