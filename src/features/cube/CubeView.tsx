@@ -5,25 +5,27 @@ import {
   PanResponder,
   TouchableOpacity,
   Text,
+  Dimensions,
 } from 'react-native';
 import { useCubeStore } from '../../store/useCubeStore';
 import { useThemeStore } from '../../store/useThemeStore';
-import { CubeCanvas } from './CubeCanvas';
-import { CubeControls } from './CubeControls';
+import { MinimalCube } from './components/MinimalCube';
+import { CubeRotationControls } from './components/CubeRotationControls';
+import { SplitView } from './components/SplitView';
 
-/**
- * Props for CubeView component
- */
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 interface CubeViewProps {
-  /** Whether to show controls overlay */
   showControls?: boolean;
+  showRotationControls?: boolean;
+  showFaceControls?: boolean;
 }
 
-/**
- * Main cube view component that combines the 3D cube canvas
- * with interactive controls for rotation and face turns
- */
-export function CubeView({ showControls = true }: CubeViewProps) {
+export function CubeView({
+  showControls = true,
+  showRotationControls = true,
+  showFaceControls = false,
+}: CubeViewProps) {
   const store = useCubeStore();
   const themeStore = useThemeStore();
   const theme = themeStore.colors;
@@ -59,89 +61,122 @@ export function CubeView({ showControls = true }: CubeViewProps) {
     })
   ).current;
 
-  return (
-    <View style={styles.container}>
-      <View
-        {...panResponder.panHandlers}
-        style={[styles.canvasContainer, { backgroundColor: theme.background }]}
-      >
-        <CubeCanvas />
-      </View>
+  const resetRotation = () => {
+    rotateFace(-25, 45);
+  };
 
-      {showControls && (
-        <View style={styles.controlsOverlay}>
-          <View style={styles.controlsRow}>
-            <View style={styles.zoomControls}>
-              <TouchableOpacity
-                style={[styles.controlButton, { backgroundColor: theme.surface }]}
-                onPress={() => setZoom(Math.max(5, state.zoom - 1))}
-              >
-                <Text style={[styles.controlButtonText, { color: theme.text }]}>-</Text>
-              </TouchableOpacity>
-              <Text style={[styles.zoomText, { color: theme.text }]}>
-                {state.zoom.toFixed(1)}x
-              </Text>
-              <TouchableOpacity
-                style={[styles.controlButton, { backgroundColor: theme.surface }]}
-                onPress={() => setZoom(Math.min(30, state.zoom + 1))}
-              >
-                <Text style={[styles.controlButtonText, { color: theme.text }]}>+</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+  // Cube content (left pane)
+  const cubeContent = (
+    <View style={styles.cubeContainer}>
+      <MinimalCube />
+
+      {/* Rotation controls */}
+      {showRotationControls && (
+        <View style={styles.rotationControlsContainer}>
+          <CubeRotationControls onReset={resetRotation} />
         </View>
       )}
 
-      {showControls && <CubeControls />}
+      {/* Zoom controls */}
+      {showControls && (
+        <View style={styles.zoomContainer}>
+          <TouchableOpacity
+            style={[styles.zoomButton, { backgroundColor: theme.surface }]}
+            onPress={() => setZoom(Math.max(5, state.zoom - 1))}
+          >
+            <Text style={[styles.zoomText, { color: theme.text }]}>-</Text>
+          </TouchableOpacity>
+          <Text style={[styles.zoomLabel, { color: theme.text }]}>
+            {state.zoom.toFixed(1)}x
+          </Text>
+          <TouchableOpacity
+            style={[styles.zoomButton, { backgroundColor: theme.surface }]}
+            onPress={() => setZoom(Math.min(30, state.zoom + 1))}
+          >
+            <Text style={[styles.zoomText, { color: theme.text }]}>+</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
+  );
+
+  // Right pane content - currently empty, can be used for algorithms
+  const rightContent = (
+    <View style={styles.rightPane}>
+      <View style={styles.emptyState}>
+        <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
+          Content area
+        </Text>
+        <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
+          Show algorithms or other content here
+        </Text>
+      </View>
+    </View>
+  );
+
+  return (
+    <SplitView left={cubeContent} right={rightContent} leftWidth={SCREEN_WIDTH / 2} rightWidth={SCREEN_WIDTH / 2} />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  cubeContainer: {
     flex: 1,
+    width: '100%',
+    height: '100%',
+    position: 'relative',
   },
-  canvasContainer: {
+  rightPane: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  touchOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 1,
-  },
-  controlsOverlay: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    zIndex: 10,
-  },
-  controlsRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  zoomControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  controlButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-    elevation: 2,
   },
-  zoomText: {
-    fontSize: 14,
+  emptyState: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
     fontWeight: '600',
-    minWidth: 40,
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 12,
     textAlign: 'center',
   },
-  controlButtonText: {
-    fontSize: 18,
+  rotationControlsContainer: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    zIndex: 10,
+  },
+  zoomContainer: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    zIndex: 10,
+  },
+  zoomButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  zoomText: {
+    fontSize: 16,
     fontWeight: 'bold',
+  },
+  zoomLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    minWidth: 30,
+    textAlign: 'center',
   },
 });

@@ -11,7 +11,9 @@
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(git stash *)",
-      "Bash(git merge *)"
+      "Bash(git merge *)",
+      "Bash(git push *)",
+      "WebFetch(domain:alg.cubing.net)"
     ]
   }
 }
