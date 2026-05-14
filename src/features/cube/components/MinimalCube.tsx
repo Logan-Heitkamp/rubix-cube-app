@@ -77,7 +77,7 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
       orange: '#ff6200',
       red: '#ed113d',
       green: '#00de21',
-      blue: '#0043b0',
+      blue: '#0033ff',
     };
 
     for (let x = -1; x <= 1; x++) {
