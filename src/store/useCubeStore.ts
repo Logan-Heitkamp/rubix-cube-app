@@ -776,9 +776,20 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     })),
   // Apply moves and calculate cubie positions without animation
   applyMovesToCubies: (moves, onComplete?) => {
-    const { cubies, scene } = get();
+    const { cubies, scene, isAnimating } = get();
+
+    // Prevent new animations if one is already running
+    if (isAnimating) {
+      console.log('applyMovesToCubies: Animation already in progress, ignoring');
+      onComplete?.();
+      return;
+    }
+
+    // Set animating flag
+    set({ isAnimating: true });
 
     if (cubies.length === 0 || !scene) {
+      set({ isAnimating: false });
       onComplete?.();
       return;
     }
@@ -876,6 +887,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       },
     });
 
+    set({ isAnimating: false });
     onComplete?.();
   },
 }));
