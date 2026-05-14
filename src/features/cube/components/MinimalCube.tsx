@@ -38,7 +38,7 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
     // Camera setup - positioned for left half view with slight angle
     const camera = new THREE.PerspectiveCamera(35, containerWidth / containerHeight, 0.1, 100);
     // Position camera to the left and up for a good viewing angle
-    camera.position.set(-2, 2, 6);
+    camera.position.set(-2, 2, 8);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -117,7 +117,7 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
 
       // Rotate camera around the cube using spherical coordinates
       if (cameraRef.current && rendererRef.current) {
-        const radius = 7;
+        const radius = 8;
         const angleX = (rotationRef.current.x * Math.PI) / 180;
         const angleY = (rotationRef.current.y * Math.PI) / 180;
 

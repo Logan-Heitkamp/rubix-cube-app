@@ -1,14 +1,7 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-} from 'react-native';
-import { useCubeStore } from '../../store/useCubeStore';
+import { View, StyleSheet, Text } from 'react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 import { MinimalCube } from './components/MinimalCube';
-import { CubeRotationControls } from './components/CubeRotationControls';
 import { SplitView } from './components/SplitView';
 
 interface CubeViewProps {
@@ -18,54 +11,15 @@ interface CubeViewProps {
 }
 
 export function CubeView({
-  showControls = true,
-  showRotationControls = true,
+  showControls = false,
+  showRotationControls = false,
   showFaceControls = false,
 }: CubeViewProps) {
-  const store = useCubeStore();
   const themeStore = useThemeStore();
   const theme = themeStore.colors;
-  const rotateFace = (x: number, y: number) => store.rotateFace(x, y);
-  const setZoom = (zoom: number) => store.setZoom(zoom);
-
-  const resetRotation = () => {
-    rotateFace(-25, 45);
-  };
 
   // Cube content (left pane)
-  const cubeContent = (
-    <View style={styles.cubeContainer}>
-      <MinimalCube />
-
-      {/* Rotation controls - positioned at bottom left */}
-      {showRotationControls && (
-        <View style={styles.rotationControlsContainer}>
-          <CubeRotationControls onReset={resetRotation} />
-        </View>
-      )}
-
-      {/* Zoom controls - positioned at top left */}
-      {showControls && (
-        <View style={styles.zoomContainer}>
-          <TouchableOpacity
-            style={[styles.zoomButton, { backgroundColor: theme.surface }]}
-            onPress={() => setZoom(Math.max(5, store.state.zoom - 1))}
-          >
-            <Text style={[styles.zoomText, { color: theme.text }]}>-</Text>
-          </TouchableOpacity>
-          <Text style={[styles.zoomLabel, { color: theme.text }]}>
-            {store.state.zoom.toFixed(1)}x
-          </Text>
-          <TouchableOpacity
-            style={[styles.zoomButton, { backgroundColor: theme.surface }]}
-            onPress={() => setZoom(Math.min(30, store.state.zoom + 1))}
-          >
-            <Text style={[styles.zoomText, { color: theme.text }]}>+</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
+  const cubeContent = <MinimalCube />;
 
   // Right pane content - currently empty, can be used for algorithms
   const rightContent = (
@@ -87,12 +41,6 @@ export function CubeView({
 }
 
 const styles = StyleSheet.create({
-  cubeContainer: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-    position: 'relative',
-  },
   rightPane: {
     flex: 1,
     width: '100%',
@@ -112,38 +60,6 @@ const styles = StyleSheet.create({
   },
   emptySubtext: {
     fontSize: 14,
-    textAlign: 'center',
-  },
-  rotationControlsContainer: {
-    position: 'absolute',
-    bottom: 24,
-    left: 24,
-    zIndex: 10,
-  },
-  zoomContainer: {
-    position: 'absolute',
-    top: 24,
-    left: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    zIndex: 10,
-  },
-  zoomButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  zoomText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  zoomLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    minWidth: 40,
     textAlign: 'center',
   },
 });
