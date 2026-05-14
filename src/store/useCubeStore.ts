@@ -104,7 +104,27 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       }));
     }
   },
-  resetCube: () =>
+  resetCube: () => {
+    const { cubies, scene } = get();
+    // Reset all cubies to original positions
+    if (cubies.length > 0 && scene) {
+      cubies.forEach((cube) => {
+        // Get the original position based on the cube's materials
+        // The position determines which face colors are visible
+        const worldPos = new THREE.Vector3();
+        cube.getWorldPosition(worldPos);
+
+        // Round to nearest integer to determine original position
+        const x = Math.round(worldPos.x);
+        const y = Math.round(worldPos.y);
+        const z = Math.round(worldPos.z);
+
+        // Reset position and rotation
+        cube.position.set(x, y, z);
+        cube.rotation.set(0, 0, 0);
+      });
+    }
+
     set({
       state: {
         faces: INITIAL_FACE_COLORS,
@@ -113,7 +133,8 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         isAlgorithmPlaying: false,
         currentAlgorithm: null,
       },
-    }),
+    });
+  },
   rotateFace: (x, y) =>
     set((prev) => ({
       state: {
