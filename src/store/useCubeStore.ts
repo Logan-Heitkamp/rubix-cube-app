@@ -842,24 +842,29 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         // Apply rotation to cubie's position (rotating around origin)
         cube.position.applyQuaternion(quaternion);
 
-        // Round to nearest integer
+            // Round to nearest integer
         cube.position.x = Math.round(cube.position.x);
         cube.position.y = Math.round(cube.position.y);
         cube.position.z = Math.round(cube.position.z);
 
         console.log(`Move ${moveNotation}: Cubie ${i} new position:`, cube.position);
 
-        // Get world rotation and apply to cubie
-        const worldQuaternion = new THREE.Quaternion();
-        cube.getWorldQuaternion(worldQuaternion);
+        // Apply the move's rotation to the cubie's rotation
+        const currentRotation = new THREE.Quaternion();
+        cube.getWorldQuaternion(currentRotation);
+
+        // Combine the move rotation with the current rotation
+        const newRotation = quaternion.clone().multiply(currentRotation);
 
         // Round rotation to nearest 90 degrees
         const euler = new THREE.Euler(0, 0, 0, 'XYZ');
-        euler.setFromQuaternion(worldQuaternion);
+        euler.setFromQuaternion(newRotation);
         euler.x = Math.round(euler.x / (Math.PI / 2)) * (Math.PI / 2);
         euler.y = Math.round(euler.y / (Math.PI / 2)) * (Math.PI / 2);
         euler.z = Math.round(euler.z / (Math.PI / 2)) * (Math.PI / 2);
         cube.rotation.copy(euler);
+
+        console.log(`Move ${moveNotation}: Cubie ${i} new rotation:`, cube.rotation);
       });
 
       console.log(`Move ${moveNotation}: First cubie position after rotation:`, sliceCubies[0].position);
