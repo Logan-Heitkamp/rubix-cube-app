@@ -610,15 +610,14 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     })),
   // Apply moves and calculate cubie positions without animation
   applyMovesToCubies: (moves, onComplete?) => {
-    const { cubies, setCubies, turnFace } = get();
+    const { cubies, scene } = get();
 
-    if (cubies.length === 0) {
+    if (cubies.length === 0 || !scene) {
       onComplete?.();
       return;
     }
 
     // Apply each move directly without animation
-    // We need to manually calculate and apply the transformations
     moves.forEach((moveNotation) => {
       const move = parseMove(moveNotation);
       if (!move) return;
@@ -634,14 +633,9 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
 
       if (sliceCubies.length === 0) return;
 
-      // Get scene from first cubie's parent hierarchy
-      const scene = cubies[0].scene || (cubies[0].parent as any)?.scene;
-
       // Create a temporary parent group at the origin
       const parentGroup = new THREE.Group();
-      if (scene) {
-        scene.add(parentGroup);
-      }
+      scene.add(parentGroup);
 
       // Store original parent for each cubie
       const originalParents: (THREE.Object3D | null)[] = [];
@@ -693,9 +687,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       });
 
       // Remove parent group
-      if (scene) {
-        scene.remove(parentGroup);
-      }
+      scene.remove(parentGroup);
     });
 
     // Update state
