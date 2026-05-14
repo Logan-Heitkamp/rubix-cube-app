@@ -18,17 +18,24 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cubesRef = useRef<THREE.Mesh[]>([]);
   const edgeLinesRef = useRef<THREE.LineSegments | null>(null);
-  // Use refs to track rotation without causing re-renders
+  // Ref to track current rotation for animation loop
+  const currentRotationRef = useRef({ x: state.rotation.x, y: state.rotation.y });
+  // Separate rotation ref for drag tracking
   const rotationRef = useRef({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
   const lastMousePosRef = useRef({ x: 0, y: 0 });
+
+  // Sync store rotation to ref whenever it changes
+  useEffect(() => {
+    currentRotationRef.current = { x: state.rotation.x, y: state.rotation.y };
+  }, [state.rotation.x, state.rotation.y]);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#0f172a'); // Dark background
+    scene.background = new THREE.Color('#b0b0b0'); // Darker grey background
     sceneRef.current = scene;
 
     // Get actual container dimensions for proper aspect ratio
@@ -63,14 +70,14 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
     const cubieSize = 0.95;
     const geometry = new THREE.BoxGeometry(cubieSize, cubieSize, cubieSize);
 
-    // Standard Rubik's colors
+    // Rubik's Cube colors
     const colors = {
       white: '#ffffff',
-      yellow: '#facc15',
-      orange: '#f97316',
-      red: '#ef4444',
-      green: '#22c55e',
-      blue: '#3b82f6',
+      yellow: '#ffff00',
+      orange: '#faa200',
+      red: '#de002e',
+      green: '#00de21',
+      blue: '#0033ff',
     };
 
     for (let x = -1; x <= 1; x++) {
@@ -79,16 +86,19 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
           // Materials order for BoxGeometry: Right, Left, Top, Bottom, Front, Back
           // Only color the outer faces, inner faces are black creating the edge effect
           const materials = [
-            new THREE.MeshBasicMaterial({ color: x === 1 ? colors.red : '#000000' }),    // Right
-            new THREE.MeshBasicMaterial({ color: x === -1 ? colors.orange : '#000000' }), // Left
-            new THREE.MeshBasicMaterial({ color: y === 1 ? colors.white : '#000000' }),   // Top
-            new THREE.MeshBasicMaterial({ color: y === -1 ? colors.yellow : '#000000' }), // Bottom
+            new THREE.MeshBasicMaterial({ color: x === 1 ? colors.orange : '#000000' }),  // Right
+            new THREE.MeshBasicMaterial({ color: x === -1 ? colors.red : '#000000' }),    // Left
+            new THREE.MeshBasicMaterial({ color: y === 1 ? colors.yellow : '#000000' }),  // Top
+            new THREE.MeshBasicMaterial({ color: y === -1 ? colors.white : '#000000' }),  // Bottom
             new THREE.MeshBasicMaterial({ color: z === 1 ? colors.green : '#000000' }),   // Front
             new THREE.MeshBasicMaterial({ color: z === -1 ? colors.blue : '#000000' }),   // Back
           ];
 
           const cube = new THREE.Mesh(geometry, materials);
           cube.position.set(x, y, z);
+          // Store original position and rotation for reset
+          (cube as any).originalPosition = { x, y, z };
+          (cube as any).originalRotation = { x: 0, y: 0, z: 0 };
           scene.add(cube);
           cubies.push(cube);
         }
@@ -96,22 +106,29 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
     }
     cubesRef.current = cubies;
 
+    // Register cubies and scene with store for face turning
+    store.setCubies(cubies);
+    store.setScene(scene);
+
     // Store initial rotation values
     rotationRef.current = { x: state.rotation.x, y: state.rotation.y };
+    currentRotationRef.current = { x: state.rotation.x, y: state.rotation.y };
 
     // Animation loop
     let animationId: number;
     const animate = () => {
       animationId = requestAnimationFrame(animate);
 
-      // Sync rotation from store without triggering re-renders
-      if (rotationRef.current.x !== state.rotation.x || rotationRef.current.y !== state.rotation.y) {
-        rotationRef.current = { x: state.rotation.x, y: state.rotation.y };
+      // Use ref to get current rotation (updated by separate effect)
+      if (rotationRef.current.x !== currentRotationRef.current.x || rotationRef.current.y !== currentRotationRef.current.y) {
+        rotationRef.current = { x: currentRotationRef.current.x, y: currentRotationRef.current.y };
       }
 
       // Rotate camera around the cube using spherical coordinates
       if (cameraRef.current && rendererRef.current) {
-        const radius = 8;
+        // Convert zoom level to radius (higher zoom = camera further away)
+        const baseRadius = 15;
+        const radius = baseRadius + state.zoom - 15;
         const angleX = (rotationRef.current.x * Math.PI) / 180;
         const angleY = (rotationRef.current.y * Math.PI) / 180;
 
@@ -154,14 +171,17 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
       const deltaY = e.clientY - lastMousePosRef.current.y;
 
       const sensitivity = 0.5;
-      const newRotationX = rotationRef.current.x - deltaY * sensitivity;
-      const newRotationY = rotationRef.current.y + deltaX * sensitivity;
+      const newRotationX = rotationRef.current.x + deltaY * sensitivity;
+      const newRotationY = rotationRef.current.y - deltaX * sensitivity;
+
+      // Limit X rotation to prevent looking straight up or down (keep between -75 and 75 degrees)
+      const clampedRotationX = Math.max(-75, Math.min(75, newRotationX));
 
       // Update rotation ref
-      rotationRef.current = { x: newRotationX, y: newRotationY };
+      rotationRef.current = { x: clampedRotationX, y: newRotationY };
 
       // Update store
-      store.rotateFace(newRotationX, newRotationY);
+      store.rotateFace(clampedRotationX, newRotationY);
 
       lastMousePosRef.current = { x: e.clientX, y: e.clientY };
     };
@@ -184,14 +204,17 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
       const deltaY = e.touches[0].clientY - lastMousePosRef.current.y;
 
       const sensitivity = 0.5;
-      const newRotationX = rotationRef.current.x - deltaY * sensitivity;
-      const newRotationY = rotationRef.current.y + deltaX * sensitivity;
+      const newRotationX = rotationRef.current.x + deltaY * sensitivity;
+      const newRotationY = rotationRef.current.y - deltaX * sensitivity;
+
+      // Limit X rotation to prevent looking straight up or down (keep between -75 and 75 degrees)
+      const clampedRotationX = Math.max(-75, Math.min(75, newRotationX));
 
       // Update rotation ref
-      rotationRef.current = { x: newRotationX, y: newRotationY };
+      rotationRef.current = { x: clampedRotationX, y: newRotationY };
 
       // Update store
-      store.rotateFace(newRotationX, newRotationY);
+      store.rotateFace(clampedRotationX, newRotationY);
 
       lastMousePosRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     };
@@ -228,7 +251,7 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
         containerRef.current.innerHTML = '';
       }
     };
-  }, [state.rotation.x, state.rotation.y, showGrid]);
+  }, [showGrid]);
 
   return (
     <View style={styles.container}>
