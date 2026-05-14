@@ -174,8 +174,8 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
       const newRotationX = rotationRef.current.x + deltaY * sensitivity;
       const newRotationY = rotationRef.current.y - deltaX * sensitivity;
 
-      // Limit X rotation to prevent looking straight up or down (keep between 15 and 165 degrees)
-      const clampedRotationX = Math.max(15, Math.min(165, newRotationX));
+      // Limit X rotation to prevent looking straight up or down (keep between -80 and 80 degrees)
+      const clampedRotationX = Math.max(-80, Math.min(80, newRotationX));
 
       // Update rotation ref
       rotationRef.current = { x: clampedRotationX, y: newRotationY };
@@ -207,8 +207,8 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
       const newRotationX = rotationRef.current.x + deltaY * sensitivity;
       const newRotationY = rotationRef.current.y - deltaX * sensitivity;
 
-      // Limit X rotation to prevent looking straight up or down (keep between 15 and 165 degrees)
-      const clampedRotationX = Math.max(15, Math.min(165, newRotationX));
+      // Limit X rotation to prevent looking straight up or down (keep between -80 and 80 degrees)
+      const clampedRotationX = Math.max(-80, Math.min(80, newRotationX));
 
       // Update rotation ref
       rotationRef.current = { x: clampedRotationX, y: newRotationY };
