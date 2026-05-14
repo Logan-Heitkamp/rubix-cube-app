@@ -108,8 +108,8 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     set({
       state: {
         faces: INITIAL_FACE_COLORS,
-        rotation: { x: -25, y: 45 },
-        zoom: 15,
+        rotation: { x: 45, y: 45 },
+        zoom: 10,
         isAlgorithmPlaying: false,
         currentAlgorithm: null,
       },
