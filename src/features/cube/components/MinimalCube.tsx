@@ -171,8 +171,8 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
       const deltaY = e.clientY - lastMousePosRef.current.y;
 
       const sensitivity = 0.5;
-      const newRotationX = rotationRef.current.x - deltaY * sensitivity;
-      const newRotationY = rotationRef.current.y + deltaX * sensitivity;
+      const newRotationX = rotationRef.current.x + deltaY * sensitivity;
+      const newRotationY = rotationRef.current.y - deltaX * sensitivity;
 
       // Update rotation ref
       rotationRef.current = { x: newRotationX, y: newRotationY };
@@ -201,8 +201,8 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
       const deltaY = e.touches[0].clientY - lastMousePosRef.current.y;
 
       const sensitivity = 0.5;
-      const newRotationX = rotationRef.current.x - deltaY * sensitivity;
-      const newRotationY = rotationRef.current.y + deltaX * sensitivity;
+      const newRotationX = rotationRef.current.x + deltaY * sensitivity;
+      const newRotationY = rotationRef.current.y - deltaX * sensitivity;
 
       // Update rotation ref
       rotationRef.current = { x: newRotationX, y: newRotationY };
