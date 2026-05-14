@@ -33,13 +33,13 @@ export interface CubeMove {
 // Standard notation: Clockwise = 1, Counter-clockwise = -1 (when looking at the face)
 export const FACE_MOVES: Record<string, CubeMove> = {
   // Top face (U) - looking from top: U is clockwise, U' is counter-clockwise
-  'U': { name: 'U', axis: 'y', direction: 1, slice: 1, angle: 90 },
-  "U'": { name: "U'", axis: 'y', direction: -1, slice: 1, angle: 90 },
+  'U': { name: 'U', axis: 'y', direction: -1, slice: 1, angle: 90 },
+  "U'": { name: "U'", axis: 'y', direction: 1, slice: 1, angle: 90 },
   'U2': { name: 'U2', axis: 'y', direction: 1, slice: 1, angle: 180 },
 
   // Bottom face (D) - looking from bottom: D is clockwise, D' is counter-clockwise
-  'D': { name: 'D', axis: 'y', direction: -1, slice: -1, angle: 90 },
-  "D'": { name: "D'", axis: 'y', direction: 1, slice: -1, angle: 90 },
+  'D': { name: 'D', axis: 'y', direction: 1, slice: -1, angle: 90 },
+  "D'": { name: "D'", axis: 'y', direction: -1, slice: -1, angle: 90 },
   'D2': { name: 'D2', axis: 'y', direction: 1, slice: -1, angle: 180 },
 
   // Left face (L) - looking from left: L is clockwise, L' is counter-clockwise
@@ -53,76 +53,70 @@ export const FACE_MOVES: Record<string, CubeMove> = {
   'R2': { name: 'R2', axis: 'x', direction: 1, slice: 1, angle: 180 },
 
   // Front face (F) - looking from front: F is clockwise, F' is counter-clockwise
-  'F': { name: 'F', axis: 'z', direction: 1, slice: 1, angle: 90 },
-  "F'": { name: "F'", axis: 'z', direction: -1, slice: 1, angle: 90 },
+  'F': { name: 'F', axis: 'z', direction: -1, slice: 1, angle: 90 },
+  "F'": { name: "F'", axis: 'z', direction: 1, slice: 1, angle: 90 },
   'F2': { name: 'F2', axis: 'z', direction: 1, slice: 1, angle: 180 },
 
   // Back face (B) - looking from back: B is clockwise, B' is counter-clockwise
-  'B': { name: 'B', axis: 'z', direction: -1, slice: -1, angle: 90 },
-  "B'": { name: "B'", axis: 'z', direction: 1, slice: -1, angle: 90 },
+  'B': { name: 'B', axis: 'z', direction: 1, slice: -1, angle: 90 },
+  "B'": { name: "B'", axis: 'z', direction: -1, slice: -1, angle: 90 },
   'B2': { name: 'B2', axis: 'z', direction: 1, slice: -1, angle: 180 },
 
   // Wide turns (2 layers)
   // u = U + E (top + middle)
-  'u': { name: 'u', axis: 'y', direction: -1, slice: 1, angle: 90 },
-  "u'": { name: "u'", axis: 'y', direction: 1, slice: 1, angle: 90 },
-  'u2': { name: 'u2', axis: 'y', direction: -1, slice: 1, angle: 180 },
+  'u': { name: 'u', axis: 'y', direction: 1, slice: 1, angle: 90 },
+  "u'": { name: "u'", axis: 'y', direction: -1, slice: 1, angle: 90 },
+  'u2': { name: 'u2', axis: 'y', direction: 1, slice: 1, angle: 180 },
 
   // d = D + E (bottom + middle)
-  'd': { name: 'd', axis: 'y', direction: 1, slice: -1, angle: 90 },
-  "d'": { name: "d'", axis: 'y', direction: -1, slice: -1, angle: 90 },
+  'd': { name: 'd', axis: 'y', direction: -1, slice: -1, angle: 90 },
+  "d'": { name: "d'", axis: 'y', direction: 1, slice: -1, angle: 90 },
   'd2': { name: 'd2', axis: 'y', direction: 1, slice: -1, angle: 180 },
 
   // l = L + M (left + middle)
-  'l': { name: 'l', axis: 'x', direction: -1, slice: -1, angle: 90 },
-  "l'": { name: "l'", axis: 'x', direction: 1, slice: -1, angle: 90 },
-  'l2': { name: 'l2', axis: 'x', direction: -1, slice: -1, angle: 180 },
+  'l': { name: 'l', axis: 'x', direction: 1, slice: -1, angle: 90 },
+  "l'": { name: "l'", axis: 'x', direction: -1, slice: -1, angle: 90 },
+  'l2': { name: 'l2', axis: 'x', direction: 1, slice: -1, angle: 180 },
 
   // r = R + M (right + middle)
-  'r': { name: 'r', axis: 'x', direction: 1, slice: 1, angle: 90 },
-  "r'": { name: "r'", axis: 'x', direction: -1, slice: 1, angle: 90 },
+  'r': { name: 'r', axis: 'x', direction: -1, slice: 1, angle: 90 },
+  "r'": { name: "r'", axis: 'x', direction: 1, slice: 1, angle: 90 },
   'r2': { name: 'r2', axis: 'x', direction: 1, slice: 1, angle: 180 },
 
   // f = F + S (front + standing)
-  'f': { name: 'f', axis: 'z', direction: -1, slice: 1, angle: 90 },
-  "f'": { name: "f'", axis: 'z', direction: 1, slice: 1, angle: 90 },
-  'f2': { name: 'f2', axis: 'z', direction: -1, slice: 1, angle: 180 },
+  'f': { name: 'f', axis: 'z', direction: 1, slice: 1, angle: 90 },
+  "f'": { name: "f'", axis: 'z', direction: -1, slice: 1, angle: 90 },
+  'f2': { name: 'f2', axis: 'z', direction: 1, slice: 1, angle: 180 },
 
   // b = B + S (back + standing)
-  'b': { name: 'b', axis: 'z', direction: 1, slice: -1, angle: 90 },
-  "b'": { name: "b'", axis: 'z', direction: -1, slice: -1, angle: 90 },
+  'b': { name: 'b', axis: 'z', direction: -1, slice: -1, angle: 90 },
+  "b'": { name: "b'", axis: 'z', direction: 1, slice: -1, angle: 90 },
   'b2': { name: 'b2', axis: 'z', direction: 1, slice: -1, angle: 180 },
 
   // Slice moves (middle layer only)
-// M: same direction as L (clockwise when looking from left)
-// E: same direction as D (clockwise when looking from bottom)
-// S: same direction as F (clockwise when looking from front)
   'M': { name: 'M', axis: 'x', direction: 1, slice: 0, angle: 90 },
   "M'": { name: "M'", axis: 'x', direction: -1, slice: 0, angle: 90 },
   'M2': { name: 'M2', axis: 'x', direction: 1, slice: 0, angle: 180 },
 
-  'E': { name: 'E', axis: 'y', direction: 1, slice: 0, angle: 90 },      // E = same direction as D
-  "E'": { name: "E'", axis: 'y', direction: -1, slice: 0, angle: 90 },   // E' = same direction as U
+  'E': { name: 'E', axis: 'y', direction: -1, slice: 0, angle: 90 },     // E = opposite of D
+  "E'": { name: "E'", axis: 'y', direction: 1, slice: 0, angle: 90 },   // E' = opposite of U
   'E2': { name: 'E2', axis: 'y', direction: 1, slice: 0, angle: 180 },
 
-  'S': { name: 'S', axis: 'z', direction: 1, slice: 0, angle: 90 },      // S = same direction as F
-  "S'": { name: "S'", axis: 'z', direction: -1, slice: 0, angle: 90 },   // S' = same direction as B
+  'S': { name: 'S', axis: 'z', direction: -1, slice: 0, angle: 90 },     // S = opposite of F
+  "S'": { name: "S'", axis: 'z', direction: 1, slice: 0, angle: 90 },   // S' = opposite of B
   'S2': { name: 'S2', axis: 'z', direction: 1, slice: 0, angle: 180 },
 
   // Whole cube rotations
-  // x: same as R (clockwise when looking from right)
-  // y: same as U (clockwise when looking from top)
-  // z: same as F (clockwise when looking from front)
-  'x': { name: 'x', axis: 'x', direction: -1, slice: 0, angle: 90 },
-  "x'": { name: "x'", axis: 'x', direction: 1, slice: 0, angle: 90 },
+  'x': { name: 'x', axis: 'x', direction: 1, slice: 0, angle: 90 },
+  "x'": { name: "x'", axis: 'x', direction: -1, slice: 0, angle: 90 },
   'x2': { name: 'x2', axis: 'x', direction: 1, slice: 0, angle: 180 },
 
-  'y': { name: 'y', axis: 'y', direction: 1, slice: 0, angle: 90 },      // y = same as U
-  "y'": { name: "y'", axis: 'y', direction: -1, slice: 0, angle: 90 },   // y' = same as D
+  'y': { name: 'y', axis: 'y', direction: -1, slice: 0, angle: 90 },     // y = opposite of U
+  "y'": { name: "y'", axis: 'y', direction: 1, slice: 0, angle: 90 },   // y' = opposite of D
   'y2': { name: 'y2', axis: 'y', direction: 1, slice: 0, angle: 180 },
 
-  'z': { name: 'z', axis: 'z', direction: 1, slice: 0, angle: 90 },      // z = same as F
-  "z'": { name: "z'", axis: 'z', direction: -1, slice: 0, angle: 90 },   // z' = same as B
+  'z': { name: 'z', axis: 'z', direction: -1, slice: 0, angle: 90 },     // z = opposite of F
+  "z'": { name: "z'", axis: 'z', direction: 1, slice: 0, angle: 90 },   // z' = opposite of B
   'z2': { name: 'z2', axis: 'z', direction: 1, slice: 0, angle: 180 },
 };
 
