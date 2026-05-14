@@ -829,6 +829,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       const originalParents: (THREE.Object3D | null)[] = [];
 
       // Add each cubie to the parent group
+      console.log(`Move ${moveNotation}: Adding ${sliceCubies.length} cubies to parent group`);
       sliceCubies.forEach((cube) => {
         originalParents.push(cube.parent);
         parentGroup.add(cube);
@@ -836,11 +837,15 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
 
       // Apply the rotation instantly (no animation)
       const totalAngle = (move.direction * move.angle * Math.PI) / 180;
+      console.log(`Move ${moveNotation}: Rotating parent group by ${totalAngle} radians around axis ${move.axis}`);
       parentGroup.rotation.set(
         move.axis === 'x' ? totalAngle : 0,
         move.axis === 'y' ? totalAngle : 0,
         move.axis === 'z' ? totalAngle : 0
       );
+
+      // Check position before restore
+      console.log(`Move ${moveNotation}: First cubie position after rotation (before restore):`, sliceCubies[0].position);
 
       // Restore cubies to their original parent
       sliceCubies.forEach((cube, i) => {
@@ -858,12 +863,15 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         cube.getWorldPosition(worldPosition);
         cube.getWorldQuaternion(worldQuaternion);
 
+        console.log(`Move ${moveNotation}: Cubie ${i} worldPosition after rotation:`, worldPosition);
+
         // Round to nearest integer for position
         worldPosition.x = Math.round(worldPosition.x);
         worldPosition.y = Math.round(worldPosition.y);
         worldPosition.z = Math.round(worldPosition.z);
 
         cube.position.copy(worldPosition);
+        console.log(`Move ${moveNotation}: Cubie ${i} position after copy:`, cube.position);
 
         // Round rotation to nearest 90 degrees
         const euler = new THREE.Euler(0, 0, 0, 'XYZ');
@@ -873,6 +881,9 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         euler.z = Math.round(euler.z / (Math.PI / 2)) * (Math.PI / 2);
         cube.rotation.copy(euler);
       });
+
+      // Check position after restore
+      console.log(`Move ${moveNotation}: First cubie position after restore:`, sliceCubies[0].position);
 
       // Remove parent group
       scene.remove(parentGroup);
