@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { CubeState, FaceColors, INITIAL_FACE_COLORS, FACE_ROTATIONS, Move } from '../entities/types';
+import { CubeState, FaceColors, INITIAL_FACE_COLORS, FACE_ROTATIONS, Move, RotationAxis } from '../entities/types';
 
 /**
  * State management for the Rubik's Cube
@@ -15,6 +15,8 @@ interface CubeStore {
   rotateFace: (x: number, y: number) => void;
   /** Set camera zoom level */
   setZoom: (zoom: number) => void;
+  /** Turn a face of the cube (rotates actual pieces) */
+  turnFace: (axis: RotationAxis, direction: 1 | -1) => void;
   /** Start playing an algorithm */
   startAlgorithm: (id: string, name: string, moves: Move[]) => void;
   /** Stop algorithm playback */
@@ -90,6 +92,18 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       state: {
         ...prev.state,
         zoom,
+      },
+    })),
+  turnFace: (axis, direction) =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        // In a real implementation, this would update the face colors
+        // For now, we'll just rotate the camera to simulate the turn
+        rotation: {
+          x: prev.state.rotation.x + (axis === 'x' ? direction * 90 : 0),
+          y: prev.state.rotation.y + (axis === 'y' ? direction * 90 : 0),
+        },
       },
     })),
   startAlgorithm: (id, name, moves) =>

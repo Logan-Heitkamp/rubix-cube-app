@@ -1,6 +1,9 @@
 /** Represents a single Rubik's Cube move notation */
 export type Move = string;
 
+/** Axis of rotation for cube turns */
+export type RotationAxis = 'x' | 'y' | 'z';
+
 /** Map of face names to color values */
 export type FaceColors = Record<string, string>;
 

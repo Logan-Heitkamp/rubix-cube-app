@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useThemeStore } from '../../store/useThemeStore';
+import { useCubeStore } from '../../store/useCubeStore';
 import { MinimalCube } from './components/MinimalCube';
 import { SplitView } from './components/SplitView';
 
@@ -17,6 +18,7 @@ export function CubeView({
 }: CubeViewProps) {
   const themeStore = useThemeStore();
   const theme = themeStore.colors;
+  const turnFace = useCubeStore((s) => s.turnFace);
 
   // Cube content (left pane)
   const cubeContent = <MinimalCube />;
@@ -24,13 +26,16 @@ export function CubeView({
   // Right pane content - currently empty, can be used for algorithms
   const rightContent = (
     <View style={styles.rightPane}>
-      <View style={styles.emptyState}>
-        <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
-          Content area
+      <View style={styles.controlsContainer}>
+        <Text style={[styles.title, { color: theme.text }]}>
+          Test Controls
         </Text>
-        <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
-          Show algorithms or other content here
-        </Text>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: theme.primary }]}
+          onPress={() => turnFace('y', 1)} // Turn top layer 90 degrees
+        >
+          <Text style={styles.buttonText}>Turn Top Layer</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -50,16 +55,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
-  emptyState: {
+  controlsContainer: {
     alignItems: 'center',
+    gap: 20,
   },
-  emptyText: {
-    fontSize: 18,
+  title: {
+    fontSize: 20,
     fontWeight: '600',
-    marginBottom: 8,
   },
-  emptySubtext: {
-    fontSize: 14,
-    textAlign: 'center',
+  button: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
