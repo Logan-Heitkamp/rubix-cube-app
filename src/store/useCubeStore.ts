@@ -821,57 +821,37 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         return;
       }
 
-      // Create a temporary parent group at the origin
-      const parentGroup = new THREE.Group();
-      scene.add(parentGroup);
-
-      // Store original parent for each cubie
-      const originalParents: (THREE.Object3D | null)[] = [];
-
-      // Add each cubie to the parent group
-      console.log(`Move ${moveNotation}: Adding ${sliceCubies.length} cubies to parent group`);
-      sliceCubies.forEach((cube) => {
-        originalParents.push(cube.parent);
-        parentGroup.add(cube);
-      });
-
-      // Apply the rotation instantly (no animation)
+      // Calculate rotation quaternion for this move
       const totalAngle = (move.direction * move.angle * Math.PI) / 180;
-      console.log(`Move ${moveNotation}: Rotating parent group by ${totalAngle} radians around axis ${move.axis}`);
-      parentGroup.rotation.set(
-        move.axis === 'x' ? totalAngle : 0,
-        move.axis === 'y' ? totalAngle : 0,
-        move.axis === 'z' ? totalAngle : 0
+      const rotationAxis = new THREE.Vector3(
+        move.axis === 'x' ? 1 : 0,
+        move.axis === 'y' ? 1 : 0,
+        move.axis === 'z' ? 1 : 0
       );
+      const quaternion = new THREE.Quaternion();
+      quaternion.setFromAxisAngle(rotationAxis, totalAngle);
 
-      // Check position before restore
-      console.log(`Move ${moveNotation}: First cubie position after rotation (before restore):`, sliceCubies[0].position);
+      console.log(`Move ${moveNotation}: Applying quaternion rotation around ${move.axis} axis by ${totalAngle} radians`);
 
-      // Restore cubies to their original parent
+      // Rotate each cubie directly around the origin
       sliceCubies.forEach((cube, i) => {
-        if (cube.parent) {
-          cube.parent.remove(cube);
-        }
+        // Store original position
+        const originalPosition = cube.position.clone();
+        console.log(`Move ${moveNotation}: Cubie ${i} original position:`, originalPosition);
 
-        if (originalParents[i]) {
-          originalParents[i].add(cube);
-        }
+        // Apply rotation to cubie's position (rotating around origin)
+        cube.position.applyQuaternion(quaternion);
 
-        // Get world position and rotation
-        const worldPosition = new THREE.Vector3();
+        // Round to nearest integer
+        cube.position.x = Math.round(cube.position.x);
+        cube.position.y = Math.round(cube.position.y);
+        cube.position.z = Math.round(cube.position.z);
+
+        console.log(`Move ${moveNotation}: Cubie ${i} new position:`, cube.position);
+
+        // Get world rotation and apply to cubie
         const worldQuaternion = new THREE.Quaternion();
-        cube.getWorldPosition(worldPosition);
         cube.getWorldQuaternion(worldQuaternion);
-
-        console.log(`Move ${moveNotation}: Cubie ${i} worldPosition after rotation:`, worldPosition);
-
-        // Round to nearest integer for position
-        worldPosition.x = Math.round(worldPosition.x);
-        worldPosition.y = Math.round(worldPosition.y);
-        worldPosition.z = Math.round(worldPosition.z);
-
-        cube.position.copy(worldPosition);
-        console.log(`Move ${moveNotation}: Cubie ${i} position after copy:`, cube.position);
 
         // Round rotation to nearest 90 degrees
         const euler = new THREE.Euler(0, 0, 0, 'XYZ');
@@ -882,11 +862,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         cube.rotation.copy(euler);
       });
 
-      // Check position after restore
-      console.log(`Move ${moveNotation}: First cubie position after restore:`, sliceCubies[0].position);
-
-      // Remove parent group
-      scene.remove(parentGroup);
+      console.log(`Move ${moveNotation}: First cubie position after rotation:`, sliceCubies[0].position);
     });
 
     // Update state
