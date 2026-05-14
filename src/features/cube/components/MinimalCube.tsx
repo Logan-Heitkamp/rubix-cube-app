@@ -18,10 +18,17 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cubesRef = useRef<THREE.Mesh[]>([]);
   const edgeLinesRef = useRef<THREE.LineSegments | null>(null);
-  // Use refs to track rotation without causing re-renders
+  // Ref to track current rotation for animation loop
+  const currentRotationRef = useRef({ x: state.rotation.x, y: state.rotation.y });
+  // Separate rotation ref for drag tracking
   const rotationRef = useRef({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
   const lastMousePosRef = useRef({ x: 0, y: 0 });
+
+  // Sync store rotation to ref whenever it changes
+  useEffect(() => {
+    currentRotationRef.current = { x: state.rotation.x, y: state.rotation.y };
+  }, [state.rotation.x, state.rotation.y]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -102,15 +109,16 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
 
     // Store initial rotation values
     rotationRef.current = { x: state.rotation.x, y: state.rotation.y };
+    currentRotationRef.current = { x: state.rotation.x, y: state.rotation.y };
 
     // Animation loop
     let animationId: number;
     const animate = () => {
       animationId = requestAnimationFrame(animate);
 
-      // Sync rotation from store without triggering re-renders
-      if (rotationRef.current.x !== state.rotation.x || rotationRef.current.y !== state.rotation.y) {
-        rotationRef.current = { x: state.rotation.x, y: state.rotation.y };
+      // Use ref to get current rotation (updated by separate effect)
+      if (rotationRef.current.x !== currentRotationRef.current.x || rotationRef.current.y !== currentRotationRef.current.y) {
+        rotationRef.current = { x: currentRotationRef.current.x, y: currentRotationRef.current.y };
       }
 
       // Rotate camera around the cube using spherical coordinates
@@ -232,7 +240,7 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
         containerRef.current.innerHTML = '';
       }
     };
-  }, [state.rotation.x, state.rotation.y, showGrid]);
+  }, [showGrid]);
 
   return (
     <View style={styles.container}>
