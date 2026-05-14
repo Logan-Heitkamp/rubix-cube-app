@@ -32,7 +32,9 @@ export function CubeView({
         </Text>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.primary }]}
-          onPress={() => turnFace('y', 1)} // Turn top layer 90 degrees
+          onPress={() => turnFace('y', 1, 1, () => {
+            console.log('Turn complete');
+          })} // Turn top layer (y=1) 90 degrees clockwise
         >
           <Text style={styles.buttonText}>Turn Top Layer</Text>
         </TouchableOpacity>

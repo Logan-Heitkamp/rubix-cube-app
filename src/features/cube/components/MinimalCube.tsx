@@ -96,6 +96,10 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
     }
     cubesRef.current = cubies;
 
+    // Register cubies and scene with store for face turning
+    store.setCubies(cubies);
+    store.setScene(scene);
+
     // Store initial rotation values
     rotationRef.current = { x: state.rotation.x, y: state.rotation.y };
 

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { CubeState, FaceColors, INITIAL_FACE_COLORS, FACE_ROTATIONS, Move, RotationAxis } from '../entities/types';
+import * as THREE from 'three';
 
 /**
  * State management for the Rubik's Cube
@@ -16,7 +17,15 @@ interface CubeStore {
   /** Set camera zoom level */
   setZoom: (zoom: number) => void;
   /** Turn a face of the cube (rotates actual pieces) */
-  turnFace: (axis: RotationAxis, direction: 1 | -1) => void;
+  turnFace: (axis: RotationAxis, direction: 1 | -1, slice: number, onComplete?: () => void) => void;
+  /** Cubies array for face turning */
+  cubies: THREE.Mesh[];
+  /** Set the cubies array for face turning */
+  setCubies: (cubies: THREE.Mesh[]) => void;
+  /** Scene for face turning animations */
+  scene: THREE.Scene | null;
+  /** Set the scene for face turning animations */
+  setScene: (scene: THREE.Scene) => void;
   /** Start playing an algorithm */
   startAlgorithm: (id: string, name: string, moves: Move[]) => void;
   /** Stop algorithm playback */
@@ -37,6 +46,16 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     isAlgorithmPlaying: false,
     currentAlgorithm: null,
   },
+  cubies: [] as THREE.Mesh[],
+  scene: null,
+  setCubies: (cubies) =>
+    set((prev) => ({
+      cubies,
+    })),
+  setScene: (scene) =>
+    set(() => ({
+      scene,
+    })),
   dispatch: (action) => {
     const { state } = get();
     if (action.type === 'MOVE_FACE' && action.payload && action.move) {
@@ -94,18 +113,101 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         zoom,
       },
     })),
-  turnFace: (axis, direction) =>
-    set((prev) => ({
-      state: {
-        ...prev.state,
-        // In a real implementation, this would update the face colors
-        // For now, we'll just rotate the camera to simulate the turn
-        rotation: {
-          x: prev.state.rotation.x + (axis === 'x' ? direction * 90 : 0),
-          y: prev.state.rotation.y + (axis === 'y' ? direction * 90 : 0),
-        },
-      },
-    })),
+  turnFace: (axis, direction, slice = 0, onComplete?) => {
+    const { cubies, scene } = get();
+    if (cubies.length === 0 || !scene) {
+      onComplete?.();
+      return;
+    }
+
+    // Find cubies in the selected slice
+    const sliceCubies = cubies.filter((cube) => {
+      if (axis === 'x') return Math.round(cube.position.x) === slice;
+      if (axis === 'y') return Math.round(cube.position.y) === slice;
+      if (axis === 'z') return Math.round(cube.position.z) === slice;
+      return false;
+    });
+
+    if (sliceCubies.length === 0) {
+      onComplete?.();
+      return;
+    }
+
+    // Animation configuration
+    const frames = 15;
+    const totalAngle = (direction * 90 * Math.PI) / 180;
+    const anglePerFrame = totalAngle / frames;
+
+    // Create rotation axis vector
+    const rotationAxis = new THREE.Vector3(
+      axis === 'x' ? 1 : 0,
+      axis === 'y' ? 1 : 0,
+      axis === 'z' ? 1 : 0
+    );
+
+    // Create a temporary parent group at the origin
+    const parentGroup = new THREE.Group();
+    scene.add(parentGroup);
+
+    // Store original parent for each cubie
+    const originalParents: (THREE.Object3D | null)[] = [];
+
+    // Add each cubie to the parent group
+    sliceCubies.forEach((cube) => {
+      originalParents.push(cube.parent);
+      parentGroup.add(cube);
+    });
+
+    // Rotate the parent group
+    let currentAngle = 0;
+
+    const animate = () => {
+      currentAngle += anglePerFrame;
+      parentGroup.rotation.set(
+        axis === 'x' ? currentAngle : 0,
+        axis === 'y' ? currentAngle : 0,
+        axis === 'z' ? currentAngle : 0
+      );
+
+      if (Math.abs(currentAngle) < Math.abs(totalAngle)) {
+        requestAnimationFrame(animate);
+      } else {
+        // Animation complete - restore cubies
+        sliceCubies.forEach((cube, i) => {
+          const worldPosition = new THREE.Vector3();
+          const worldQuaternion = new THREE.Quaternion();
+          cube.getWorldPosition(worldPosition);
+          cube.getWorldQuaternion(worldQuaternion);
+
+          worldPosition.x = Math.round(worldPosition.x);
+          worldPosition.y = Math.round(worldPosition.y);
+          worldPosition.z = Math.round(worldPosition.z);
+
+          if (cube.parent) {
+            cube.parent.remove(cube);
+          }
+
+          if (originalParents[i] !== null) {
+            originalParents[i].add(cube);
+          }
+
+          cube.position.copy(worldPosition);
+
+          const euler = new THREE.Euler(0, 0, 0, 'XYZ');
+          euler.setFromQuaternion(worldQuaternion);
+          euler.x = Math.round(euler.x / (Math.PI / 2)) * (Math.PI / 2);
+          euler.y = Math.round(euler.y / (Math.PI / 2)) * (Math.PI / 2);
+          euler.z = Math.round(euler.z / (Math.PI / 2)) * (Math.PI / 2);
+          cube.rotation.copy(euler);
+        });
+
+        scene.remove(parentGroup);
+        onComplete?.();
+      }
+    };
+
+    animate();
+  },
   startAlgorithm: (id, name, moves) =>
     set((prev) => ({
       state: {
