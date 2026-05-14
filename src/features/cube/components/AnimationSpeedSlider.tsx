@@ -53,6 +53,11 @@ export function AnimationSpeedSlider({ value, onChange, theme }: AnimationSpeedS
 
   return (
     <View style={styles.container}>
+      {/* Speed multiplier display */}
+      <Text style={[styles.speedDisplay, { color: theme.text }]}>
+        {value.toFixed(1)}x
+      </Text>
+
       <View
         ref={sliderRef}
         style={styles.sliderContainer}
@@ -95,16 +100,22 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
   },
+  speedDisplay: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
   sliderContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    height: 30,
+    height: 16,
     padding: 0,
   },
   track: {
     flex: 1,
-    height: 4,
+    height: 3,
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -114,12 +125,12 @@ const styles = StyleSheet.create({
   },
   thumb: {
     position: 'absolute',
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     top: '50%',
-    marginTop: -8,
-    transform: [{ translateX: -8 }],
+    marginTop: -6,
+    transform: [{ translateX: -6 }],
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
