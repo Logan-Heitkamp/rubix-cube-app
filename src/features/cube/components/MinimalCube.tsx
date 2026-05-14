@@ -35,7 +35,29 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#0f172a'); // Dark background
+
+    // Create checkerboard background texture
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      // Fill with light grey
+      ctx.fillStyle = '#cccccc';
+      ctx.fillRect(0, 0, 256, 256);
+      // Draw dark grey squares in checkerboard pattern
+      ctx.fillStyle = '#999999';
+      const squareSize = 32;
+      for (let y = 0; y < 256; y += squareSize) {
+        for (let x = 0; x < 256; x += squareSize) {
+          if ((x / squareSize + y / squareSize) % 2 === 1) {
+            ctx.fillRect(x, y, squareSize, squareSize);
+          }
+        }
+      }
+    }
+    const checkerboardTexture = new THREE.CanvasTexture(canvas);
+    scene.background = checkerboardTexture;
     sceneRef.current = scene;
 
     // Get actual container dimensions for proper aspect ratio
