@@ -123,9 +123,9 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
 
       // Rotate camera around the cube using spherical coordinates
       if (cameraRef.current && rendererRef.current) {
-        // Convert zoom level to radius (higher zoom = lower radius)
-        const baseRadius = 30;
-        const radius = baseRadius - state.zoom + 15;
+        // Convert zoom level to radius (higher zoom = camera further away)
+        const baseRadius = 15;
+        const radius = baseRadius + state.zoom - 15;
         const angleX = (rotationRef.current.x * Math.PI) / 180;
         const angleY = (rotationRef.current.y * Math.PI) / 180;
 
