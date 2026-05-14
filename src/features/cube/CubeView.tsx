@@ -35,21 +35,20 @@ export function CubeView({
   const algorithmMovesInputRef = useRef<TextInput>(null);
   const setupTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
 
-  // Apply setup moves when input changes
+  // Apply setup moves when input changes - reset cube then apply moves immediately
   useEffect(() => {
     // Clear any pending timeouts
     setupTimeoutsRef.current.forEach(clearTimeout);
     setupTimeoutsRef.current = [];
 
+    // Reset cube to initial state
+    resetCube();
+
+    // Apply all setup moves immediately (no animation)
     if (setupMovesInput.trim()) {
       const moves = setupMovesInput.trim().split(/\s+/).filter(m => m.length > 0);
-      let delay = 0;
       moves.forEach((move) => {
-        const timeoutId = setTimeout(() => {
-          turnMove(move);
-        }, delay);
-        setupTimeoutsRef.current.push(timeoutId);
-        delay += 200;
+        turnMove(move);
       });
     }
   }, [setupMovesInput]);
