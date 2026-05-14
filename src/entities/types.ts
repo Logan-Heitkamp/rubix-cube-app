@@ -44,6 +44,8 @@ export interface CubeState {
   /** Cubie positions and rotations */
   cubiePositions: CubiePosition[];
   cubieRotations: CubieRotation[];
+  /** Animation speed multiplier (0.1 to 16) */
+  animationSpeed: number;
 }
 
 /**

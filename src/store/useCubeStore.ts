@@ -29,6 +29,8 @@ interface CubeStore {
   turnAlgorithm: (moves: string[], onComplete?: () => void, time?: number) => void;
   /** Apply moves to cubies without animation */
   applyMovesToCubies: (moves: string[], onComplete?: () => void) => void;
+  /** Set animation speed multiplier */
+  setAnimationSpeed: (speed: number) => void;
   /** Set setup moves */
   setSetupMoves: (moves: string) => void;
   /** Set algorithm moves */
@@ -76,6 +78,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     currentMoveIndex: 0,
     cubiePositions: [],
     cubieRotations: [],
+    animationSpeed: 1,
   },
   cubies: [] as THREE.Mesh[],
   scene: null,
@@ -116,6 +119,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
           currentMoveIndex: 0,
           cubiePositions: [],
           cubieRotations: [],
+          animationSpeed: 1,
         },
       });
     } else if (action.type === 'ROTATE_CAMERA') {
@@ -163,6 +167,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         currentMoveIndex: 0,
         cubiePositions: [],
         cubieRotations: [],
+        animationSpeed: 1,
       },
     });
   },
@@ -290,13 +295,17 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       parentGroup.add(cube);
     });
 
+    // Get speed multiplier from state
+    const speed = get().state.animationSpeed;
+    const adjustedTime = time / speed;
+
     // Rotate the parent group
     let currentAngle = 0;
     const startTime = Date.now();
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / time, 1);
+      const progress = Math.min(elapsed / adjustedTime, 1);
       currentAngle = totalAngle * progress;
       parentGroup.rotation.set(
         axis === 'x' ? currentAngle : 0,
@@ -434,13 +443,17 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       parentGroup.add(cube);
     });
 
+    // Get speed multiplier from state
+    const speed = get().state.animationSpeed;
+    const adjustedTime = time / speed;
+
     // Rotate the parent group
     let currentAngle = 0;
     const startTime = Date.now();
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / time, 1);
+      const progress = Math.min(elapsed / adjustedTime, 1);
       currentAngle = totalAngle * progress;
       parentGroup.rotation.set(
         move.axis === 'x' ? currentAngle : 0,
@@ -590,13 +603,17 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       parentGroup.add(cube);
     });
 
+    // Get speed multiplier from state
+    const speed = get().state.animationSpeed;
+    const adjustedTime = time / speed;
+
     // Rotate the parent group
     let currentAngle = 0;
     const startTime = Date.now();
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / time, 1);
+      const progress = Math.min(elapsed / adjustedTime, 1);
       currentAngle = totalAngle * progress;
       parentGroup.rotation.set(
         axis === 'x' ? currentAngle : 0,
@@ -722,6 +739,13 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         ...prev.state,
         algorithmMoves: moves,
         currentMoveIndex: 0,
+      },
+    })),
+  setAnimationSpeed: (speed) =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        animationSpeed: speed,
       },
     })),
   playAlgorithm: () => {

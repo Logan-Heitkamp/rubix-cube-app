@@ -27,6 +27,8 @@ export function CubeView({
   const resetAlgorithm = useCubeStore((s) => s.resetAlgorithm);
   const currentMoveIndex = useCubeStore((s) => s.state.currentMoveIndex);
   const isAlgorithmPlaying = useCubeStore((s) => s.state.isAlgorithmPlaying);
+  const animationSpeed = useCubeStore((s) => s.state.animationSpeed);
+  const setAnimationSpeed = useCubeStore((s) => s.setAnimationSpeed);
 
   const [setupMovesInput, setSetupMovesInput] = useState('');
   const [algorithmMovesInput, setAlgorithmMovesInput] = useState('');
@@ -133,6 +135,37 @@ export function CubeView({
             {isAlgorithmPlaying
               ? `Playing move ${currentMoveIndex + 1} of ${algorithmMovesInput.trim().split(/\s+/).filter(m => m.length > 0).length}`
               : 'Enter moves to animate'}
+          </Text>
+        </View>
+
+        {/* Animation Speed Slider */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Animation Speed</Text>
+          <View style={styles.sliderContainer}>
+            <Text style={[styles.hint, { color: theme.textSecondary }]}>
+              {animationSpeed.toFixed(1)}x
+            </Text>
+            <input
+              type="range"
+              min={0.1}
+              max={16}
+              step={0.1}
+              value={animationSpeed}
+              onChange={(e) => setAnimationSpeed(parseFloat(e.target.value))}
+              style={{
+                width: '100%',
+                height: 4,
+                borderRadius: 2,
+                cursor: 'pointer',
+                WebkitAppearance: 'none',
+                outline: 'none',
+                backgroundColor: theme.border,
+                color: theme.primary,
+              }}
+            />
+          </View>
+          <Text style={[styles.hint, { color: theme.textSecondary }]}>
+            Adjust animation speed from 0.1x to 16x
           </Text>
         </View>
 
@@ -262,5 +295,11 @@ const styles = StyleSheet.create({
   resetCubeText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  sliderContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    width: '100%',
   },
 });
