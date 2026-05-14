@@ -174,11 +174,14 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
       const newRotationX = rotationRef.current.x + deltaY * sensitivity;
       const newRotationY = rotationRef.current.y - deltaX * sensitivity;
 
+      // Limit X rotation to prevent looking straight up or down (keep between 10 and 80 degrees)
+      const clampedRotationX = Math.max(10, Math.min(80, newRotationX));
+
       // Update rotation ref
-      rotationRef.current = { x: newRotationX, y: newRotationY };
+      rotationRef.current = { x: clampedRotationX, y: newRotationY };
 
       // Update store
-      store.rotateFace(newRotationX, newRotationY);
+      store.rotateFace(clampedRotationX, newRotationY);
 
       lastMousePosRef.current = { x: e.clientX, y: e.clientY };
     };
@@ -204,11 +207,14 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
       const newRotationX = rotationRef.current.x + deltaY * sensitivity;
       const newRotationY = rotationRef.current.y - deltaX * sensitivity;
 
+      // Limit X rotation to prevent looking straight up or down (keep between 10 and 80 degrees)
+      const clampedRotationX = Math.max(10, Math.min(80, newRotationX));
+
       // Update rotation ref
-      rotationRef.current = { x: newRotationX, y: newRotationY };
+      rotationRef.current = { x: clampedRotationX, y: newRotationY };
 
       // Update store
-      store.rotateFace(newRotationX, newRotationY);
+      store.rotateFace(clampedRotationX, newRotationY);
 
       lastMousePosRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     };
