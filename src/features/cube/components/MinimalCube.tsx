@@ -36,20 +36,9 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
     // Scene setup
     const scene = new THREE.Scene();
 
-    // Create checkerboard pattern using SVG data URI
-    const checkerboardSvg = `
-      <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        <rect width="200" height="200" fill="#f0f0f0"/>
-        <g fill="#cccccc">
-          <rect width="50" height="50"/>
-          <rect x="100" width="50" height="50"/>
-          <rect y="100" width="50" height="50"/>
-          <rect x="100" y="100" width="50" height="50"/>
-        </g>
-      </svg>
-    `;
-    const checkerboardUrl = 'data:image/svg+xml;base64,' + btoa(checkerboardSvg);
-    const checkerboardTexture = new THREE.TextureLoader().load(checkerboardUrl);
+    // Create checkerboard pattern from image
+    const textureLoader = new THREE.TextureLoader();
+    const checkerboardTexture = textureLoader.load('https://static.vecteezy.com/system/resources/previews/008/953/369/non_2x/transparent-background-png-texture-background-transparent-grid-free-vector.jpg');
     scene.background = checkerboardTexture;
     sceneRef.current = scene;
 
