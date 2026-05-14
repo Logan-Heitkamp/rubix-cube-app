@@ -610,98 +610,103 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     })),
   // Apply moves and calculate cubie positions without animation
   applyMovesToCubies: (moves, onComplete?) => {
-    const { cubies, setCubies } = get();
+    const { cubies, setCubies, turnFace } = get();
 
     if (cubies.length === 0) {
       onComplete?.();
       return;
     }
 
-    // Store original positions and rotations
-    const originalPositions = cubies.map((cube) => ({
+    // Apply each move directly without animation
+    // We need to manually calculate and apply the transformations
+    moves.forEach((moveNotation) => {
+      const move = parseMove(moveNotation);
+      if (!move) return;
+
+      // Find cubies in the slice
+      const sliceCubies = cubies.filter((cube) => {
+        return (
+          (move.axis === 'x' && Math.round(cube.position.x) === move.slice) ||
+          (move.axis === 'y' && Math.round(cube.position.y) === move.slice) ||
+          (move.axis === 'z' && Math.round(cube.position.z) === move.slice)
+        );
+      });
+
+      if (sliceCubies.length === 0) return;
+
+      // Create a temporary parent group at the origin
+      const parentGroup = new THREE.Group();
+      if (cubies[0].parent) {
+        cubies[0].parent.add(parentGroup);
+      }
+
+      // Add each cubie to the parent group
+      sliceCubies.forEach((cube) => {
+        parentGroup.add(cube);
+      });
+
+      // Apply the rotation instantly (no animation)
+      const totalAngle = (move.direction * move.angle * Math.PI) / 180;
+      parentGroup.rotation.set(
+        move.axis === 'x' ? totalAngle : 0,
+        move.axis === 'y' ? totalAngle : 0,
+        move.axis === 'z' ? totalAngle : 0
+      );
+
+      // Restore cubies to their original parent
+      sliceCubies.forEach((cube) => {
+        if (cube.parent) {
+          cube.parent.remove(cube);
+        }
+        if (cubies[0].parent) {
+          cubies[0].parent.add(cube);
+        }
+
+        // Get world position and rotation
+        const worldPosition = new THREE.Vector3();
+        const worldQuaternion = new THREE.Quaternion();
+        cube.getWorldPosition(worldPosition);
+        cube.getWorldQuaternion(worldQuaternion);
+
+        // Round to nearest integer for position
+        worldPosition.x = Math.round(worldPosition.x);
+        worldPosition.y = Math.round(worldPosition.y);
+        worldPosition.z = Math.round(worldPosition.z);
+
+        cube.position.copy(worldPosition);
+
+        // Round rotation to nearest 90 degrees
+        const euler = new THREE.Euler(0, 0, 0, 'XYZ');
+        euler.setFromQuaternion(worldQuaternion);
+        euler.x = Math.round(euler.x / (Math.PI / 2)) * (Math.PI / 2);
+        euler.y = Math.round(euler.y / (Math.PI / 2)) * (Math.PI / 2);
+        euler.z = Math.round(euler.z / (Math.PI / 2)) * (Math.PI / 2);
+        cube.rotation.copy(euler);
+      });
+
+      // Remove parent group
+      if (cubies[0].parent) {
+        cubies[0].parent.remove(parentGroup);
+      }
+    });
+
+    // Update state
+    const cubiePositions = cubies.map((cube) => ({
       x: cube.position.x,
       y: cube.position.y,
       z: cube.position.z,
     }));
-    const originalRotations = cubies.map((cube) => ({
+    const cubieRotations = cubies.map((cube) => ({
       x: cube.rotation.x,
       y: cube.rotation.y,
       z: cube.rotation.z,
     }));
 
-    // Clone cubies with their original state
-    const cubieState = cubies.map((cube, i) => ({
-      position: { ...originalPositions[i] },
-      rotation: { ...originalRotations[i] },
-    }));
-
-    // Apply each move to calculate final positions
-    const finalState = moves.reduce((state, moveNotation) => {
-      const move = parseMove(moveNotation);
-      if (!move) return state;
-
-      return state.map((cubie) => {
-        // Check if cubie is in the slice to be rotated
-        const isInSlice =
-          (move.axis === 'x' && Math.round(cubie.position.x) === move.slice) ||
-          (move.axis === 'y' && Math.round(cubie.position.y) === move.slice) ||
-          (move.axis === 'z' && Math.round(cubie.position.z) === move.slice);
-
-        if (!isInSlice) return cubie;
-
-        // Apply rotation using 90 degree rotations
-        const newPos = { ...cubie.position };
-        const newRot = { ...cubie.rotation };
-
-        const angle = (move.direction * move.angle * Math.PI) / 180;
-
-        // Rotate position around origin
-        if (move.axis === 'x') {
-          const y = newPos.y * Math.cos(angle) - newPos.z * Math.sin(angle);
-          const z = newPos.y * Math.sin(angle) + newPos.z * Math.cos(angle);
-          newPos.y = Math.round(y);
-          newPos.z = Math.round(z);
-          // Rotate rotation
-          const rx = newRot.x;
-          const ry = newRot.y * Math.cos(angle) - newRot.z * Math.sin(angle);
-          const rz = newRot.y * Math.sin(angle) + newRot.z * Math.cos(angle);
-          newRot.y = Math.round(ry / (Math.PI / 2)) * (Math.PI / 2);
-          newRot.z = Math.round(rz / (Math.PI / 2)) * (Math.PI / 2);
-        } else if (move.axis === 'y') {
-          const x = newPos.x * Math.cos(angle) + newPos.z * Math.sin(angle);
-          const z = -newPos.x * Math.sin(angle) + newPos.z * Math.cos(angle);
-          newPos.x = Math.round(x);
-          newPos.z = Math.round(z);
-          const rx = newRot.x * Math.cos(angle) + newRot.z * Math.sin(angle);
-          const rz = -newRot.x * Math.sin(angle) + newRot.z * Math.cos(angle);
-          newRot.x = Math.round(rx / (Math.PI / 2)) * (Math.PI / 2);
-          newRot.z = Math.round(rz / (Math.PI / 2)) * (Math.PI / 2);
-        } else if (move.axis === 'z') {
-          const x = newPos.x * Math.cos(angle) - newPos.y * Math.sin(angle);
-          const y = newPos.x * Math.sin(angle) + newPos.y * Math.cos(angle);
-          newPos.x = Math.round(x);
-          newPos.y = Math.round(y);
-          const rx = newRot.x * Math.cos(angle) - newRot.y * Math.sin(angle);
-          const ry = newRot.x * Math.sin(angle) + newRot.y * Math.cos(angle);
-          newRot.x = Math.round(rx / (Math.PI / 2)) * (Math.PI / 2);
-          newRot.y = Math.round(ry / (Math.PI / 2)) * (Math.PI / 2);
-        }
-
-        return { position: newPos, rotation: newRot };
-      });
-    }, cubieState);
-
-    // Update cubie positions and rotations
-    cubies.forEach((cube, i) => {
-      cube.position.set(finalState[i].position.x, finalState[i].position.y, finalState[i].position.z);
-      cube.rotation.set(finalState[i].rotation.x, finalState[i].rotation.y, finalState[i].rotation.z);
-    });
-
     set({
       state: {
         ...get().state,
-        cubiePositions: finalState.map((s) => s.position),
-        cubieRotations: finalState.map((s) => s.rotation),
+        cubiePositions,
+        cubieRotations,
       },
     });
 
