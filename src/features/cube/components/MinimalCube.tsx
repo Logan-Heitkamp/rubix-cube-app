@@ -86,8 +86,8 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
           // Materials order for BoxGeometry: Right, Left, Top, Bottom, Front, Back
           // Only color the outer faces, inner faces are black creating the edge effect
           const materials = [
-            new THREE.MeshBasicMaterial({ color: x === 1 ? colors.red : '#000000' }),    // Right
-            new THREE.MeshBasicMaterial({ color: x === -1 ? colors.orange : '#000000' }), // Left
+            new THREE.MeshBasicMaterial({ color: x === 1 ? colors.orange : '#000000' }),  // Right
+            new THREE.MeshBasicMaterial({ color: x === -1 ? colors.red : '#000000' }),    // Left
             new THREE.MeshBasicMaterial({ color: y === 1 ? colors.yellow : '#000000' }),  // Top
             new THREE.MeshBasicMaterial({ color: y === -1 ? colors.white : '#000000' }),  // Bottom
             new THREE.MeshBasicMaterial({ color: z === 1 ? colors.green : '#000000' }),   // Front
