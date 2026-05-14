@@ -39,6 +39,10 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
     // Load background image
     const textureLoader = new THREE.TextureLoader();
     const backgroundTexture = textureLoader.load('/cube_background.jpg');
+    backgroundTexture.colorSpace = THREE.SRGBColorSpace;
+    backgroundTexture.generateMipmaps = false;
+    backgroundTexture.minFilter = THREE.LinearFilter;
+    backgroundTexture.magFilter = THREE.LinearFilter;
     scene.background = backgroundTexture;
     sceneRef.current = scene;
 
