@@ -30,36 +30,37 @@ export interface CubeMove {
  */
 
 // Face turns (single layer)
+// Standard notation: Clockwise = 1, Counter-clockwise = -1 (when looking at the face)
 export const FACE_MOVES: Record<string, CubeMove> = {
-  // Top face (U)
-  'U': { name: 'U', axis: 'y', direction: -1, slice: 1, angle: 90 },    // U = counter-clockwise from top view
-  "U'": { name: "U'", axis: 'y', direction: 1, slice: 1, angle: 90 },   // U' = clockwise
-  'U2': { name: 'U2', axis: 'y', direction: -1, slice: 1, angle: 180 }, // U2 = 180 degrees
+  // Top face (U) - looking from top: U is clockwise, U' is counter-clockwise
+  'U': { name: 'U', axis: 'y', direction: 1, slice: 1, angle: 90 },
+  "U'": { name: "U'", axis: 'y', direction: -1, slice: 1, angle: 90 },
+  'U2': { name: 'U2', axis: 'y', direction: 1, slice: 1, angle: 180 },
 
-  // Bottom face (D)
-  'D': { name: 'D', axis: 'y', direction: 1, slice: -1, angle: 90 },     // D = clockwise from bottom view
-  "D'": { name: "D'", axis: 'y', direction: -1, slice: -1, angle: 90 },  // D' = counter-clockwise
-  'D2': { name: 'D2', axis: 'y', direction: 1, slice: -1, angle: 180 },  // D2 = 180 degrees
+  // Bottom face (D) - looking from bottom: D is clockwise, D' is counter-clockwise
+  'D': { name: 'D', axis: 'y', direction: -1, slice: -1, angle: 90 },
+  "D'": { name: "D'", axis: 'y', direction: 1, slice: -1, angle: 90 },
+  'D2': { name: 'D2', axis: 'y', direction: 1, slice: -1, angle: 180 },
 
-  // Left face (L)
-  'L': { name: 'L', axis: 'x', direction: -1, slice: -1, angle: 90 },    // L = counter-clockwise
-  "L'": { name: "L'", axis: 'x', direction: 1, slice: -1, angle: 90 },   // L' = clockwise
-  'L2': { name: 'L2', axis: 'x', direction: -1, slice: -1, angle: 180 }, // L2 = 180 degrees
+  // Left face (L) - looking from left: L is clockwise, L' is counter-clockwise
+  'L': { name: 'L', axis: 'x', direction: 1, slice: -1, angle: 90 },
+  "L'": { name: "L'", axis: 'x', direction: -1, slice: -1, angle: 90 },
+  'L2': { name: 'L2', axis: 'x', direction: 1, slice: -1, angle: 180 },
 
-  // Right face (R)
-  'R': { name: 'R', axis: 'x', direction: 1, slice: 1, angle: 90 },      // R = clockwise
-  "R'": { name: "R'", axis: 'x', direction: -1, slice: 1, angle: 90 },   // R' = counter-clockwise
-  'R2': { name: 'R2', axis: 'x', direction: 1, slice: 1, angle: 180 },   // R2 = 180 degrees
+  // Right face (R) - looking from right: R is clockwise, R' is counter-clockwise
+  'R': { name: 'R', axis: 'x', direction: -1, slice: 1, angle: 90 },
+  "R'": { name: "R'", axis: 'x', direction: 1, slice: 1, angle: 90 },
+  'R2': { name: 'R2', axis: 'x', direction: 1, slice: 1, angle: 180 },
 
-  // Front face (F)
-  'F': { name: 'F', axis: 'z', direction: -1, slice: 1, angle: 90 },     // F = counter-clockwise
-  "F'": { name: "F'", axis: 'z', direction: 1, slice: 1, angle: 90 },    // F' = clockwise
-  'F2': { name: 'F2', axis: 'z', direction: -1, slice: 1, angle: 180 },  // F2 = 180 degrees
+  // Front face (F) - looking from front: F is clockwise, F' is counter-clockwise
+  'F': { name: 'F', axis: 'z', direction: 1, slice: 1, angle: 90 },
+  "F'": { name: "F'", axis: 'z', direction: -1, slice: 1, angle: 90 },
+  'F2': { name: 'F2', axis: 'z', direction: 1, slice: 1, angle: 180 },
 
-  // Back face (B)
-  'B': { name: 'B', axis: 'z', direction: 1, slice: -1, angle: 90 },     // B = clockwise
-  "B'": { name: "B'", axis: 'z', direction: -1, slice: -1, angle: 90 },  // B' = counter-clockwise
-  'B2': { name: 'B2', axis: 'z', direction: 1, slice: -1, angle: 180 },  // B2 = 180 degrees
+  // Back face (B) - looking from back: B is clockwise, B' is counter-clockwise
+  'B': { name: 'B', axis: 'z', direction: -1, slice: -1, angle: 90 },
+  "B'": { name: "B'", axis: 'z', direction: 1, slice: -1, angle: 90 },
+  'B2': { name: 'B2', axis: 'z', direction: 1, slice: -1, angle: 180 },
 
   // Wide turns (2 layers)
   // u = U + E (top + middle)
@@ -93,37 +94,43 @@ export const FACE_MOVES: Record<string, CubeMove> = {
   'b2': { name: 'b2', axis: 'z', direction: 1, slice: -1, angle: 180 },
 
   // Slice moves (middle layer only)
-  'M': { name: 'M', axis: 'x', direction: 1, slice: 0, angle: 90 },      // M = same direction as L
-  "M'": { name: "M'", axis: 'x', direction: -1, slice: 0, angle: 90 },   // M' = same direction as R
+// M: same direction as L (clockwise when looking from left)
+// E: same direction as D (clockwise when looking from bottom)
+// S: same direction as F (clockwise when looking from front)
+  'M': { name: 'M', axis: 'x', direction: 1, slice: 0, angle: 90 },
+  "M'": { name: "M'", axis: 'x', direction: -1, slice: 0, angle: 90 },
   'M2': { name: 'M2', axis: 'x', direction: 1, slice: 0, angle: 180 },
 
-  'E': { name: 'E', axis: 'y', direction: -1, slice: 0, angle: 90 },     // E = same direction as D
-  "E'": { name: "E'", axis: 'y', direction: 1, slice: 0, angle: 90 },    // E' = same direction as U
-  'E2': { name: 'E2', axis: 'y', direction: -1, slice: 0, angle: 180 },
+  'E': { name: 'E', axis: 'y', direction: 1, slice: 0, angle: 90 },      // E = same direction as D
+  "E'": { name: "E'", axis: 'y', direction: -1, slice: 0, angle: 90 },   // E' = same direction as U
+  'E2': { name: 'E2', axis: 'y', direction: 1, slice: 0, angle: 180 },
 
-  'S': { name: 'S', axis: 'z', direction: -1, slice: 0, angle: 90 },     // S = same direction as F
-  "S'": { name: "S'", axis: 'z', direction: 1, slice: 0, angle: 90 },    // S' = same direction as B
-  'S2': { name: 'S2', axis: 'z', direction: -1, slice: 0, angle: 180 },
+  'S': { name: 'S', axis: 'z', direction: 1, slice: 0, angle: 90 },      // S = same direction as F
+  "S'": { name: "S'", axis: 'z', direction: -1, slice: 0, angle: 90 },   // S' = same direction as B
+  'S2': { name: 'S2', axis: 'z', direction: 1, slice: 0, angle: 180 },
 
   // Whole cube rotations
-  'x': { name: 'x', axis: 'x', direction: 1, slice: 0, angle: 90 },      // x = same as R
-  "x'": { name: "x'", axis: 'x', direction: -1, slice: 0, angle: 90 },   // x' = same as L
+  // x: same as R (clockwise when looking from right)
+  // y: same as U (clockwise when looking from top)
+  // z: same as F (clockwise when looking from front)
+  'x': { name: 'x', axis: 'x', direction: -1, slice: 0, angle: 90 },
+  "x'": { name: "x'", axis: 'x', direction: 1, slice: 0, angle: 90 },
   'x2': { name: 'x2', axis: 'x', direction: 1, slice: 0, angle: 180 },
 
-  'y': { name: 'y', axis: 'y', direction: -1, slice: 0, angle: 90 },     // y = same as U
-  "y'": { name: "y'", axis: 'y', direction: 1, slice: 0, angle: 90 },    // y' = same as D
-  'y2': { name: 'y2', axis: 'y', direction: -1, slice: 0, angle: 180 },
+  'y': { name: 'y', axis: 'y', direction: 1, slice: 0, angle: 90 },      // y = same as U
+  "y'": { name: "y'", axis: 'y', direction: -1, slice: 0, angle: 90 },   // y' = same as D
+  'y2': { name: 'y2', axis: 'y', direction: 1, slice: 0, angle: 180 },
 
-  'z': { name: 'z', axis: 'z', direction: -1, slice: 0, angle: 90 },     // z = same as F
-  "z'": { name: "z'", axis: 'z', direction: 1, slice: 0, angle: 90 },    // z' = same as B
-  'z2': { name: 'z2', axis: 'z', direction: -1, slice: 0, angle: 180 },
+  'z': { name: 'z', axis: 'z', direction: 1, slice: 0, angle: 90 },      // z = same as F
+  "z'": { name: "z'", axis: 'z', direction: -1, slice: 0, angle: 90 },   // z' = same as B
+  'z2': { name: 'z2', axis: 'z', direction: 1, slice: 0, angle: 180 },
 };
 
 /**
  * Parse a move notation string into a CubeMove
  */
 export function parseMove(notation: string): CubeMove | null {
-  // Normalize notation (handle lowercase for face turns)
+  // Normalize notation
   const normalized = notation.trim();
 
   // Check if it's a standard move

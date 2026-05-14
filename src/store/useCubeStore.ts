@@ -40,185 +40,6 @@ interface CubeStore {
 }
 
 /**
- * Turn a face of the cube - internal helper
- */
-function turnFaceInternal(
-  axis: RotationAxis,
-  direction: 1 | -1,
-  slice: number,
-  onComplete?: () => void
-) {
-  const { cubies, scene } = get();
-  if (cubies.length === 0 || !scene) {
-    onComplete?.();
-    return;
-  }
-
-  // Find cubies in the selected slice
-  const sliceCubies = cubies.filter((cube) => {
-    if (axis === 'x') return Math.round(cube.position.x) === slice;
-    if (axis === 'y') return Math.round(cube.position.y) === slice;
-    if (axis === 'z') return Math.round(cube.position.z) === slice;
-    return false;
-  });
-
-  if (sliceCubies.length === 0) {
-    onComplete?.();
-    return;
-  }
-
-  // Animation configuration
-  const frames = 15;
-  const totalAngle = (direction * 90 * Math.PI) / 180;
-  const anglePerFrame = totalAngle / frames;
-
-  // Create a temporary parent group at the origin
-  const parentGroup = new THREE.Group();
-  scene.add(parentGroup);
-
-  // Store original parent for each cubie
-  const originalParents: (THREE.Object3D | null)[] = [];
-
-  // Add each cubie to the parent group
-  sliceCubies.forEach((cube) => {
-    originalParents.push(cube.parent);
-    parentGroup.add(cube);
-  });
-
-  // Rotate the parent group
-  let currentAngle = 0;
-
-  const animate = () => {
-    currentAngle += anglePerFrame;
-    parentGroup.rotation.set(
-      axis === 'x' ? currentAngle : 0,
-      axis === 'y' ? currentAngle : 0,
-      axis === 'z' ? currentAngle : 0
-    );
-
-    if (Math.abs(currentAngle) < Math.abs(totalAngle)) {
-      requestAnimationFrame(animate);
-    } else {
-      // Animation complete - restore cubies
-      sliceCubies.forEach((cube, i) => {
-        const worldPosition = new THREE.Vector3();
-        const worldQuaternion = new THREE.Quaternion();
-        cube.getWorldPosition(worldPosition);
-        cube.getWorldQuaternion(worldQuaternion);
-
-        worldPosition.x = Math.round(worldPosition.x);
-        worldPosition.y = Math.round(worldPosition.y);
-        worldPosition.z = Math.round(worldPosition.z);
-
-        if (cube.parent) {
-          cube.parent.remove(cube);
-        }
-
-        if (originalParents[i] !== null) {
-          originalParents[i].add(cube);
-        }
-
-        cube.position.copy(worldPosition);
-
-        const euler = new THREE.Euler(0, 0, 0, 'XYZ');
-        euler.setFromQuaternion(worldQuaternion);
-        euler.x = Math.round(euler.x / (Math.PI / 2)) * (Math.PI / 2);
-        euler.y = Math.round(euler.y / (Math.PI / 2)) * (Math.PI / 2);
-        euler.z = Math.round(euler.z / (Math.PI / 2)) * (Math.PI / 2);
-        cube.rotation.copy(euler);
-      });
-
-      scene.remove(parentGroup);
-      onComplete?.();
-    }
-  };
-
-  animate();
-}
-
-/**
- * Turn entire cube (x, y, z moves) - rotates all cubies
- */
-function turnFaceWholeCube(move: CubeMove, onComplete?: () => void) {
-  const { cubies, scene } = get();
-  if (cubies.length === 0 || !scene) {
-    onComplete?.();
-    return;
-  }
-
-  // All cubies rotate for whole cube turns
-  const allCubies = [...cubies];
-
-  // Animation configuration
-  const frames = 15;
-  const totalAngle = (move.direction * 90 * Math.PI) / 180;
-  const anglePerFrame = totalAngle / frames;
-
-  // Create a temporary parent group at the origin
-  const parentGroup = new THREE.Group();
-  scene.add(parentGroup);
-
-  // Store original parent for each cubie
-  const originalParents: (THREE.Object3D | null)[] = [];
-
-  // Add each cubie to the parent group
-  allCubies.forEach((cube) => {
-    originalParents.push(cube.parent);
-    parentGroup.add(cube);
-  });
-
-  // Rotate the parent group
-  let currentAngle = 0;
-
-  const animate = () => {
-    currentAngle += anglePerFrame;
-    parentGroup.rotation.set(
-      move.axis === 'x' ? currentAngle : 0,
-      move.axis === 'y' ? currentAngle : 0,
-      move.axis === 'z' ? currentAngle : 0
-    );
-
-    if (Math.abs(currentAngle) < Math.abs(totalAngle)) {
-      requestAnimationFrame(animate);
-    } else {
-      // Animation complete - restore cubies
-      allCubies.forEach((cube, i) => {
-        const worldPosition = new THREE.Vector3();
-        const worldQuaternion = new THREE.Quaternion();
-        cube.getWorldPosition(worldPosition);
-        cube.getWorldQuaternion(worldQuaternion);
-
-        worldPosition.x = Math.round(worldPosition.x);
-        worldPosition.y = Math.round(worldPosition.y);
-        worldPosition.z = Math.round(worldPosition.z);
-
-        if (cube.parent) {
-          cube.parent.remove(cube);
-        }
-
-        if (originalParents[i] !== null) {
-          originalParents[i].add(cube);
-        }
-
-        cube.position.copy(worldPosition);
-
-        const euler = new THREE.Euler(0, 0, 0, 'XYZ');
-        euler.setFromQuaternion(worldQuaternion);
-        euler.x = Math.round(euler.x / (Math.PI / 2)) * (Math.PI / 2);
-        euler.y = Math.round(euler.y / (Math.PI / 2)) * (Math.PI / 2);
-        euler.z = Math.round(euler.z / (Math.PI / 2)) * (Math.PI / 2);
-        cube.rotation.copy(euler);
-      });
-
-      scene.remove(parentGroup);
-      onComplete?.();
-    }
-  };
-
-  animate();
-}
-
-/**
  * Zustand store for cube state management
  * Handles cube rotation, zoom, and algorithm playback
  */
@@ -297,10 +118,283 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         zoom,
       },
     })),
-  turnFace: (axis, direction, slice = 0, onComplete?) => {
-    turnFaceInternal(axis, direction, slice, onComplete);
+  // Helper function to turn a face
+  turnFace: (axis, direction, slice = 0, angle = 90, onComplete?) => {
+    const { cubies, scene } = get();
+    if (cubies.length === 0 || !scene) {
+      console.log('turnFaceInternal: No cubies or scene');
+      onComplete?.();
+      return;
+    }
+
+    console.log(`turnFaceInternal: axis=${axis}, direction=${direction}, slice=${slice}, cubies=${cubies.length}`);
+
+    // Find cubies in the selected slice
+    const sliceCubies = cubies.filter((cube) => {
+      const result = (
+        (axis === 'x' && Math.round(cube.position.x) === slice) ||
+        (axis === 'y' && Math.round(cube.position.y) === slice) ||
+        (axis === 'z' && Math.round(cube.position.z) === slice)
+      );
+      if (result) {
+        console.log(`  Found cubie at (${cube.position.x.toFixed(2)}, ${cube.position.y.toFixed(2)}, ${cube.position.z.toFixed(2)})`);
+      }
+      return result;
+    });
+
+    console.log(`  Found ${sliceCubies.length} cubies in slice`);
+
+    if (sliceCubies.length === 0) {
+      console.log('  No cubies found, returning');
+      onComplete?.();
+      return;
+    }
+
+    // Animation configuration
+    const frames = 15;
+    const totalAngle = (direction * angle * Math.PI) / 180;
+    const anglePerFrame = totalAngle / frames;
+
+    // Create a temporary parent group at the origin
+    const parentGroup = new THREE.Group();
+    scene.add(parentGroup);
+
+    // Store original parent for each cubie
+    const originalParents: (THREE.Object3D | null)[] = [];
+
+    // Add each cubie to the parent group
+    sliceCubies.forEach((cube) => {
+      originalParents.push(cube.parent);
+      parentGroup.add(cube);
+    });
+
+    // Rotate the parent group
+    let currentAngle = 0;
+
+    const animate = () => {
+      currentAngle += anglePerFrame;
+      parentGroup.rotation.set(
+        axis === 'x' ? currentAngle : 0,
+        axis === 'y' ? currentAngle : 0,
+        axis === 'z' ? currentAngle : 0
+      );
+
+      if (Math.abs(currentAngle) < Math.abs(totalAngle)) {
+        requestAnimationFrame(animate);
+      } else {
+        // Animation complete - restore cubies
+        sliceCubies.forEach((cube, i) => {
+          const worldPosition = new THREE.Vector3();
+          const worldQuaternion = new THREE.Quaternion();
+          cube.getWorldPosition(worldPosition);
+          cube.getWorldQuaternion(worldQuaternion);
+
+          worldPosition.x = Math.round(worldPosition.x);
+          worldPosition.y = Math.round(worldPosition.y);
+          worldPosition.z = Math.round(worldPosition.z);
+
+          if (cube.parent) {
+            cube.parent.remove(cube);
+          }
+
+          if (originalParents[i] !== null) {
+            originalParents[i].add(cube);
+          }
+
+          cube.position.copy(worldPosition);
+
+          const euler = new THREE.Euler(0, 0, 0, 'XYZ');
+          euler.setFromQuaternion(worldQuaternion);
+          euler.x = Math.round(euler.x / (Math.PI / 2)) * (Math.PI / 2);
+          euler.y = Math.round(euler.y / (Math.PI / 2)) * (Math.PI / 2);
+          euler.z = Math.round(euler.z / (Math.PI / 2)) * (Math.PI / 2);
+          cube.rotation.copy(euler);
+        });
+
+        scene.remove(parentGroup);
+        onComplete?.();
+      }
+    };
+
+    animate();
+  },
+  // Helper function to turn entire cube (x, y, z moves)
+  turnFaceWholeCube: (move: CubeMove, onComplete?: () => void) => {
+    const { cubies, scene } = get();
+    if (cubies.length === 0 || !scene) {
+      console.log('turnFaceWholeCube: No cubies or scene');
+      onComplete?.();
+      return;
+    }
+
+    console.log(`turnFaceWholeCube: axis=${move.axis}, direction=${move.direction}, slice=${move.slice}, angle=${move.angle}`);
+
+    // All cubies rotate for whole cube turns
+    const allCubies = [...cubies];
+
+    // Animation configuration
+    const frames = 15;
+    const totalAngle = (move.direction * move.angle * Math.PI) / 180;
+    const anglePerFrame = totalAngle / frames;
+
+    // Create a temporary parent group at the origin
+    const parentGroup = new THREE.Group();
+    scene.add(parentGroup);
+
+    // Store original parent for each cubie
+    const originalParents: (THREE.Object3D | null)[] = [];
+
+    // Add each cubie to the parent group
+    allCubies.forEach((cube) => {
+      originalParents.push(cube.parent);
+      parentGroup.add(cube);
+    });
+
+    // Rotate the parent group
+    let currentAngle = 0;
+
+    const animate = () => {
+      currentAngle += anglePerFrame;
+      parentGroup.rotation.set(
+        move.axis === 'x' ? currentAngle : 0,
+        move.axis === 'y' ? currentAngle : 0,
+        move.axis === 'z' ? currentAngle : 0
+      );
+
+      if (Math.abs(currentAngle) < Math.abs(totalAngle)) {
+        requestAnimationFrame(animate);
+      } else {
+        // Animation complete - restore cubies
+        allCubies.forEach((cube, i) => {
+          const worldPosition = new THREE.Vector3();
+          const worldQuaternion = new THREE.Quaternion();
+          cube.getWorldPosition(worldPosition);
+          cube.getWorldQuaternion(worldQuaternion);
+
+          worldPosition.x = Math.round(worldPosition.x);
+          worldPosition.y = Math.round(worldPosition.y);
+          worldPosition.z = Math.round(worldPosition.z);
+
+          if (cube.parent) {
+            cube.parent.remove(cube);
+          }
+
+          if (originalParents[i] !== null) {
+            originalParents[i].add(cube);
+          }
+
+          cube.position.copy(worldPosition);
+
+          const euler = new THREE.Euler(0, 0, 0, 'XYZ');
+          euler.setFromQuaternion(worldQuaternion);
+          euler.x = Math.round(euler.x / (Math.PI / 2)) * (Math.PI / 2);
+          euler.y = Math.round(euler.y / (Math.PI / 2)) * (Math.PI / 2);
+          euler.z = Math.round(euler.z / (Math.PI / 2)) * (Math.PI / 2);
+          cube.rotation.copy(euler);
+        });
+
+        scene.remove(parentGroup);
+        onComplete?.();
+      }
+    };
+
+    animate();
+  },
+  // Helper function to turn 2 layers (wide turn)
+  turnWideFace: (axis, direction, slice, angle = 90, onComplete?) => {
+    const { cubies, scene } = get();
+    if (cubies.length === 0 || !scene) {
+      console.log('turnWideFace: No cubies or scene');
+      onComplete?.();
+      return;
+    }
+
+    console.log(`turnWideFace: axis=${axis}, direction=${direction}, slice=${slice}, angle=${angle}`);
+
+    // Find cubies in the selected slice AND the middle slice
+    const sliceCubies = cubies.filter((cube) => {
+      const pos = axis === 'x' ? cube.position.x : axis === 'y' ? cube.position.y : cube.position.z;
+      return Math.round(pos) === slice || Math.round(pos) === 0;
+    });
+
+    console.log(`  Found ${sliceCubies.length} cubies in slices ${slice} and 0`);
+
+    if (sliceCubies.length === 0) {
+      console.log('  No cubies found, returning');
+      onComplete?.();
+      return;
+    }
+
+    // Animation configuration
+    const frames = 15;
+    const totalAngle = (direction * angle * Math.PI) / 180;
+    const anglePerFrame = totalAngle / frames;
+
+    // Create a temporary parent group at the origin
+    const parentGroup = new THREE.Group();
+    scene.add(parentGroup);
+
+    // Store original parent for each cubie
+    const originalParents: (THREE.Object3D | null)[] = [];
+
+    // Add each cubie to the parent group
+    sliceCubies.forEach((cube) => {
+      originalParents.push(cube.parent);
+      parentGroup.add(cube);
+    });
+
+    // Rotate the parent group
+    let currentAngle = 0;
+
+    const animate = () => {
+      currentAngle += anglePerFrame;
+      parentGroup.rotation.set(
+        axis === 'x' ? currentAngle : 0,
+        axis === 'y' ? currentAngle : 0,
+        axis === 'z' ? currentAngle : 0
+      );
+
+      if (Math.abs(currentAngle) < Math.abs(totalAngle)) {
+        requestAnimationFrame(animate);
+      } else {
+        // Animation complete - restore cubies
+        sliceCubies.forEach((cube, i) => {
+          const worldPosition = new THREE.Vector3();
+          const worldQuaternion = new THREE.Quaternion();
+          cube.getWorldPosition(worldPosition);
+          cube.getWorldQuaternion(worldQuaternion);
+
+          worldPosition.x = Math.round(worldPosition.x);
+          worldPosition.y = Math.round(worldPosition.y);
+          worldPosition.z = Math.round(worldPosition.z);
+
+          if (cube.parent) {
+            cube.parent.remove(cube);
+          }
+
+          if (originalParents[i] !== null) {
+            originalParents[i].add(cube);
+          }
+
+          cube.position.copy(worldPosition);
+
+          const euler = new THREE.Euler(0, 0, 0, 'XYZ');
+          euler.setFromQuaternion(worldQuaternion);
+          euler.x = Math.round(euler.x / (Math.PI / 2)) * (Math.PI / 2);
+          euler.y = Math.round(euler.y / (Math.PI / 2)) * (Math.PI / 2);
+          euler.z = Math.round(euler.z / (Math.PI / 2)) * (Math.PI / 2);
+          cube.rotation.copy(euler);
+        });
+
+        scene.remove(parentGroup);
+        onComplete?.();
+      }
+    };
+
+    animate();
   },
   turnMove: (notation, onComplete?) => {
+    console.log(`turnMove called: ${notation}`);
     const move = parseMove(notation);
     if (!move) {
       console.warn(`Invalid move notation: ${notation}`);
@@ -308,12 +402,21 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       return;
     }
 
+    console.log(`Move parsed: axis=${move.axis}, direction=${move.direction}, slice=${move.slice}, angle=${move.angle}`);
+
     // For whole cube rotations (x, y, z), we need to rotate ALL cubies
+    // For wide turns (lowercase), we need to turn 2 layers
     // For face turns, we use the slice parameter
     if (['x', 'y', 'z', "x'", "y'", "z'", 'x2', 'y2', 'z2'].includes(notation)) {
-      turnFaceWholeCube(move, onComplete);
+      console.log('Using turnFaceWholeCube');
+      get().turnFaceWholeCube(move, onComplete);
+    } else if (notation.length === 1 && notation === notation.toLowerCase()) {
+      // Wide turn - turn this slice AND the middle slice
+      console.log('Using wide turn');
+      get().turnWideFace(move.axis, move.direction, move.slice, move.angle, onComplete);
     } else {
-      get().turnFace(move.axis, move.direction, move.slice, onComplete);
+      console.log('Using turnFaceInternal');
+      get().turnFace(move.axis, move.direction, move.slice, move.angle, onComplete);
     }
   },
   turnAlgorithm: (moves, onComplete?) => {
