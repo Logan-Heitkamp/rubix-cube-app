@@ -88,8 +88,8 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
           const materials = [
             new THREE.MeshBasicMaterial({ color: x === 1 ? colors.red : '#000000' }),    // Right
             new THREE.MeshBasicMaterial({ color: x === -1 ? colors.orange : '#000000' }), // Left
-            new THREE.MeshBasicMaterial({ color: y === 1 ? colors.white : '#000000' }),   // Top
-            new THREE.MeshBasicMaterial({ color: y === -1 ? colors.yellow : '#000000' }), // Bottom
+            new THREE.MeshBasicMaterial({ color: y === 1 ? colors.yellow : '#000000' }),  // Top
+            new THREE.MeshBasicMaterial({ color: y === -1 ? colors.white : '#000000' }),  // Bottom
             new THREE.MeshBasicMaterial({ color: z === 1 ? colors.green : '#000000' }),   // Front
             new THREE.MeshBasicMaterial({ color: z === -1 ? colors.blue : '#000000' }),   // Back
           ];
