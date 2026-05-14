@@ -74,7 +74,7 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
     const colors = {
       white: '#ffffff',
       yellow: '#ffff00',
-      orange: '#ff6200',
+      orange: '#FF5F1F',
       red: '#ed113d',
       green: '#00de21',
       blue: '#0033ff',
