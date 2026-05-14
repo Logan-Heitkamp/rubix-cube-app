@@ -106,6 +106,7 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
     }
     cubesRef.current = cubies;
 
+    console.log('MinimalCube: Registering', cubies.length, 'cubies with store');
     // Register cubies and scene with store for face turning
     store.setCubies(cubies);
     store.setScene(scene);
