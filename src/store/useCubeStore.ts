@@ -815,7 +815,11 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         );
       });
 
-      if (sliceCubies.length === 0) return;
+      console.log(`Move ${moveNotation}: Found ${sliceCubies.length} cubies`);
+      if (sliceCubies.length === 0) {
+        console.log('applyMovesToCubies: No cubies found, stopping');
+        return;
+      }
 
       // Create a temporary parent group at the origin
       const parentGroup = new THREE.Group();
@@ -875,6 +879,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     });
 
     // Update state
+    console.log('applyMovesToCubies: First cubie position before update:', cubies[0].position);
     const cubiePositions = cubies.map((cube) => ({
       x: cube.position.x,
       y: cube.position.y,
@@ -886,6 +891,8 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       z: cube.rotation.z,
     }));
 
+    console.log('applyMovesToCubies: First cubie position after mapping:', cubiePositions[0]);
+
     set({
       state: {
         ...get().state,
@@ -893,6 +900,8 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         cubieRotations,
       },
     });
+
+    console.log('applyMovesToCubies: After state update, first cubie position:', cubies[0].position);
 
     set({ isAnimating: false });
     onComplete?.();
