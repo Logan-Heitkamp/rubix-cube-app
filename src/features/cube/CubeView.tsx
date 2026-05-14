@@ -4,6 +4,7 @@ import { useThemeStore } from '../../store/useThemeStore';
 import { useCubeStore } from '../../store/useCubeStore';
 import { MinimalCube } from './components/MinimalCube';
 import { SplitView } from './components/SplitView';
+import { AnimationSpeedSlider } from './components/AnimationSpeedSlider';
 
 interface CubeViewProps {
   showControls?: boolean;
@@ -141,29 +142,11 @@ export function CubeView({
         {/* Animation Speed Slider */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Animation Speed</Text>
-          <View style={styles.sliderContainer}>
-            <Text style={[styles.hint, { color: theme.textSecondary }]}>
-              {animationSpeed.toFixed(1)}x
-            </Text>
-            <input
-              type="range"
-              min={0.1}
-              max={16}
-              step={0.1}
-              value={animationSpeed}
-              onChange={(e) => setAnimationSpeed(parseFloat(e.target.value))}
-              style={{
-                width: '100%',
-                height: 4,
-                borderRadius: 2,
-                cursor: 'pointer',
-                WebkitAppearance: 'none',
-                outline: 'none',
-                backgroundColor: theme.border,
-                color: theme.primary,
-              }}
-            />
-          </View>
+          <AnimationSpeedSlider
+            value={animationSpeed}
+            onChange={setAnimationSpeed}
+            theme={theme}
+          />
           <Text style={[styles.hint, { color: theme.textSecondary }]}>
             Adjust animation speed from 0.1x to 16x
           </Text>
