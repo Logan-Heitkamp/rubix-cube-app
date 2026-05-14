@@ -779,14 +779,8 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
   applyMovesToCubies: (moves, onComplete?) => {
     const { cubies, scene, isAnimating } = get();
 
-    console.log('applyMovesToCubies: Cubies count', cubies.length);
-    if (scene) {
-      console.log('applyMovesToCubies: Using scene', scene.uuid);
-    }
-
     // Prevent new animations if one is already running
     if (isAnimating) {
-      console.log('applyMovesToCubies: Animation already in progress, ignoring');
       onComplete?.();
       return;
     }
@@ -795,7 +789,6 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     set({ isAnimating: true });
 
     if (cubies.length === 0 || !scene) {
-      console.log('applyMovesToCubies: No cubies or scene');
       set({ isAnimating: false });
       onComplete?.();
       return;
@@ -815,11 +808,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         );
       });
 
-      console.log(`Move ${moveNotation}: Found ${sliceCubies.length} cubies`);
-      if (sliceCubies.length === 0) {
-        console.log('applyMovesToCubies: No cubies found, stopping');
-        return;
-      }
+      if (sliceCubies.length === 0) return;
 
       // Calculate rotation quaternion for this move
       const totalAngle = (move.direction * move.angle * Math.PI) / 180;
@@ -831,23 +820,15 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       const quaternion = new THREE.Quaternion();
       quaternion.setFromAxisAngle(rotationAxis, totalAngle);
 
-      console.log(`Move ${moveNotation}: Applying quaternion rotation around ${move.axis} axis by ${totalAngle} radians`);
-
       // Rotate each cubie directly around the origin
-      sliceCubies.forEach((cube, i) => {
-        // Store original position
-        const originalPosition = cube.position.clone();
-        console.log(`Move ${moveNotation}: Cubie ${i} original position:`, originalPosition);
-
+      sliceCubies.forEach((cube) => {
         // Apply rotation to cubie's position (rotating around origin)
         cube.position.applyQuaternion(quaternion);
 
-            // Round to nearest integer
+        // Round to nearest integer
         cube.position.x = Math.round(cube.position.x);
         cube.position.y = Math.round(cube.position.y);
         cube.position.z = Math.round(cube.position.z);
-
-        console.log(`Move ${moveNotation}: Cubie ${i} new position:`, cube.position);
 
         // Apply the move's rotation to the cubie's rotation
         const currentRotation = new THREE.Quaternion();
@@ -863,15 +844,10 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         euler.y = Math.round(euler.y / (Math.PI / 2)) * (Math.PI / 2);
         euler.z = Math.round(euler.z / (Math.PI / 2)) * (Math.PI / 2);
         cube.rotation.copy(euler);
-
-        console.log(`Move ${moveNotation}: Cubie ${i} new rotation:`, cube.rotation);
       });
-
-      console.log(`Move ${moveNotation}: First cubie position after rotation:`, sliceCubies[0].position);
     });
 
     // Update state
-    console.log('applyMovesToCubies: First cubie position before update:', cubies[0].position);
     const cubiePositions = cubies.map((cube) => ({
       x: cube.position.x,
       y: cube.position.y,
@@ -883,8 +859,6 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       z: cube.rotation.z,
     }));
 
-    console.log('applyMovesToCubies: First cubie position after mapping:', cubiePositions[0]);
-
     set({
       state: {
         ...get().state,
@@ -892,8 +866,6 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         cubieRotations,
       },
     });
-
-    console.log('applyMovesToCubies: After state update, first cubie position:', cubies[0].position);
 
     set({ isAnimating: false });
     onComplete?.();
