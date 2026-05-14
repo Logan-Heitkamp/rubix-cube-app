@@ -560,10 +560,8 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     const moves = state.algorithmMoves.trim().split(/\s+/).filter(m => m.length > 0);
     if (moves.length === 0) return;
 
-    let currentIndex = state.currentMoveIndex;
-    if (currentIndex >= moves.length) {
-      currentIndex = 0;
-    }
+    // Start from the beginning when playing (not from currentMoveIndex)
+    let currentIndex = 0;
 
     const playNextMove = () => {
       if (currentIndex >= moves.length) {
@@ -586,6 +584,7 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       }));
 
       turnMove(moves[currentIndex], () => {
+        currentIndex++;
         playNextMove();
       });
     };

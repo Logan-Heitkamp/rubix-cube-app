@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useCubeStore } from '../../store/useCubeStore';
@@ -33,16 +33,22 @@ export function CubeView({
 
   const setupMovesInputRef = useRef<TextInput>(null);
   const algorithmMovesInputRef = useRef<TextInput>(null);
+  const setupTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
 
   // Apply setup moves when input changes
-  React.useEffect(() => {
+  useEffect(() => {
+    // Clear any pending timeouts
+    setupTimeoutsRef.current.forEach(clearTimeout);
+    setupTimeoutsRef.current = [];
+
     if (setupMovesInput.trim()) {
       const moves = setupMovesInput.trim().split(/\s+/).filter(m => m.length > 0);
       let delay = 0;
       moves.forEach((move) => {
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           turnMove(move);
         }, delay);
+        setupTimeoutsRef.current.push(timeoutId);
         delay += 200;
       });
     }
@@ -117,6 +123,7 @@ export function CubeView({
               setAlgorithmMoves(algorithmMovesInput);
             }}
             returnKeyType="done"
+            editable={!isAlgorithmPlaying}
           />
           <Text style={[styles.hint, { color: theme.textSecondary }]}>
             {isAlgorithmPlaying
@@ -134,6 +141,7 @@ export function CubeView({
                 setAlgorithmMoves(algorithmMovesInput);
                 playAlgorithm();
               }}
+              disabled={isAlgorithmPlaying}
             >
               <Text style={[styles.buttonText, { color: '#fff' }]}>Play</Text>
             </TouchableOpacity>
