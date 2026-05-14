@@ -259,10 +259,7 @@ const canvasStyle: React.CSSProperties = {
   height: '100%',
   overflow: 'hidden',
   cursor: 'grab',
-  backgroundImage: 'url(/cube_background.jpg)',
-  backgroundSize: 'contain',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center',
+  backgroundColor: 'transparent',
 };
 
 const styles = StyleSheet.create({
@@ -270,5 +267,9 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
+    backgroundImage: 'url(/cube_background.jpg)',
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
   },
 });
