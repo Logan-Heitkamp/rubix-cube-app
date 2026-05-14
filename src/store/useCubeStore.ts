@@ -23,6 +23,16 @@ interface CubeStore {
   turnMove: (notation: string, onComplete?: () => void) => void;
   /** Turn multiple moves in sequence */
   turnAlgorithm: (moves: string[], onComplete?: () => void) => void;
+  /** Set setup moves */
+  setSetupMoves: (moves: string) => void;
+  /** Set algorithm moves */
+  setAlgorithmMoves: (moves: string) => void;
+  /** Play algorithm from current position */
+  playAlgorithm: () => void;
+  /** Pause algorithm playback */
+  pauseAlgorithm: () => void;
+  /** Reset algorithm playback */
+  resetAlgorithm: () => void;
   /** Cubies array for face turning */
   cubies: THREE.Mesh[];
   /** Set the cubies array for face turning */
@@ -55,6 +65,9 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
     isAlgorithmPlaying: false,
     isAnimating: false,
     currentAlgorithm: null,
+    setupMoves: '',
+    algorithmMoves: '',
+    currentMoveIndex: 0,
   },
   cubies: [] as THREE.Mesh[],
   scene: null,
@@ -525,6 +538,73 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         ...prev.state,
         isAlgorithmPlaying: false,
         currentAlgorithm: null,
+      },
+    })),
+  setSetupMoves: (moves) =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        setupMoves: moves,
+      },
+    })),
+  setAlgorithmMoves: (moves) =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        algorithmMoves: moves,
+        currentMoveIndex: 0,
+      },
+    })),
+  playAlgorithm: () => {
+    const { state, turnMove } = get();
+    const moves = state.algorithmMoves.trim().split(/\s+/).filter(m => m.length > 0);
+    if (moves.length === 0) return;
+
+    let currentIndex = state.currentMoveIndex;
+    if (currentIndex >= moves.length) {
+      currentIndex = 0;
+    }
+
+    const playNextMove = () => {
+      if (currentIndex >= moves.length) {
+        set((prev) => ({
+          state: {
+            ...prev.state,
+            isAlgorithmPlaying: false,
+            currentMoveIndex: 0,
+          },
+        }));
+        return;
+      }
+
+      set((prev) => ({
+        state: {
+          ...prev.state,
+          isAlgorithmPlaying: true,
+          currentMoveIndex: currentIndex,
+        },
+      }));
+
+      turnMove(moves[currentIndex], () => {
+        playNextMove();
+      });
+    };
+
+    playNextMove();
+  },
+  pauseAlgorithm: () =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        isAlgorithmPlaying: false,
+      },
+    })),
+  resetAlgorithm: () =>
+    set((prev) => ({
+      state: {
+        ...prev.state,
+        isAlgorithmPlaying: false,
+        currentMoveIndex: 0,
       },
     })),
 }));

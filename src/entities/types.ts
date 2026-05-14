@@ -21,6 +21,12 @@ export interface CubeState {
   isAlgorithmPlaying: boolean;
   /** Currently playing algorithm (if any) */
   currentAlgorithm: AlgorithmPlayback | null;
+  /** Setup moves to apply to the cube initially */
+  setupMoves: string;
+  /** Algorithm moves to play back */
+  algorithmMoves: string;
+  /** Current move index in algorithm playback */
+  currentMoveIndex: number;
 }
 
 /**
