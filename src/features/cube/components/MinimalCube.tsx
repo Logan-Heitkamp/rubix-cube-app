@@ -70,14 +70,14 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
     const cubieSize = 0.95;
     const geometry = new THREE.BoxGeometry(cubieSize, cubieSize, cubieSize);
 
-    // Standard Rubik's colors
+    // Rubik's Cube colors
     const colors = {
       white: '#ffffff',
-      yellow: '#facc15',
-      orange: '#f97316',
-      red: '#ef4444',
-      green: '#22c55e',
-      blue: '#3b82f6',
+      yellow: '#ffff00',
+      orange: '#ff6200',
+      red: '#ed113d',
+      green: '#00de21',
+      blue: '#0043b0',
     };
 
     for (let x = -1; x <= 1; x++) {
