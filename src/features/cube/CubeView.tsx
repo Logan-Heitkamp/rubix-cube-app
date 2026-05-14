@@ -25,8 +25,8 @@ export function CubeView({
   const playAlgorithm = useCubeStore((s) => s.playAlgorithm);
   const pauseAlgorithm = useCubeStore((s) => s.pauseAlgorithm);
   const resetAlgorithm = useCubeStore((s) => s.resetAlgorithm);
-  const currentMoveIndex = useCubeStore((s) => s.currentMoveIndex);
-  const isAlgorithmPlaying = useCubeStore((s) => s.isAlgorithmPlaying);
+  const currentMoveIndex = useCubeStore((s) => s.state.currentMoveIndex);
+  const isAlgorithmPlaying = useCubeStore((s) => s.state.isAlgorithmPlaying);
 
   const [setupMovesInput, setSetupMovesInput] = useState('');
   const [algorithmMovesInput, setAlgorithmMovesInput] = useState('');
