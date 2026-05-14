@@ -59,8 +59,9 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
 
     // Create 27 cubies with clean materials
     const cubies: THREE.Mesh[] = [];
-    // Use slightly smaller geometry to create visible edges
-    const geometry = new THREE.BoxGeometry(0.92, 0.92, 0.92);
+    // Cubie size - smaller than 1 to create visible gaps (edges)
+    const cubieSize = 0.95;
+    const geometry = new THREE.BoxGeometry(cubieSize, cubieSize, cubieSize);
 
     // Standard Rubik's colors
     const colors = {
@@ -70,20 +71,20 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
       red: '#ef4444',
       green: '#22c55e',
       blue: '#3b82f6',
-      internal: '#000000', // Black for edges
     };
 
     for (let x = -1; x <= 1; x++) {
       for (let y = -1; y <= 1; y++) {
         for (let z = -1; z <= 1; z++) {
           // Materials order for BoxGeometry: Right, Left, Top, Bottom, Front, Back
+          // Only color the outer faces, inner faces are black creating the edge effect
           const materials = [
-            new THREE.MeshBasicMaterial({ color: x === 1 ? colors.red : colors.internal }),    // Right
-            new THREE.MeshBasicMaterial({ color: x === -1 ? colors.orange : colors.internal }), // Left
-            new THREE.MeshBasicMaterial({ color: y === 1 ? colors.white : colors.internal }),   // Top
-            new THREE.MeshBasicMaterial({ color: y === -1 ? colors.yellow : colors.internal }), // Bottom
-            new THREE.MeshBasicMaterial({ color: z === 1 ? colors.green : colors.internal }),   // Front
-            new THREE.MeshBasicMaterial({ color: z === -1 ? colors.blue : colors.internal }),   // Back
+            new THREE.MeshBasicMaterial({ color: x === 1 ? colors.red : '#000000' }),    // Right
+            new THREE.MeshBasicMaterial({ color: x === -1 ? colors.orange : '#000000' }), // Left
+            new THREE.MeshBasicMaterial({ color: y === 1 ? colors.white : '#000000' }),   // Top
+            new THREE.MeshBasicMaterial({ color: y === -1 ? colors.yellow : '#000000' }), // Bottom
+            new THREE.MeshBasicMaterial({ color: z === 1 ? colors.green : '#000000' }),   // Front
+            new THREE.MeshBasicMaterial({ color: z === -1 ? colors.blue : '#000000' }),   // Back
           ];
 
           const cube = new THREE.Mesh(geometry, materials);
@@ -94,13 +95,6 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
       }
     }
     cubesRef.current = cubies;
-
-    // Add black edge lines between colored faces
-    const edgeGeometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(3, 3, 3));
-    const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
-    const edgeLines = new THREE.LineSegments(edgeGeometry, edgeMaterial);
-    edgeLinesRef.current = edgeLines;
-    scene.add(edgeLines);
 
     // Store initial rotation values
     rotationRef.current = { x: state.rotation.x, y: state.rotation.y };
