@@ -96,6 +96,9 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
 
           const cube = new THREE.Mesh(geometry, materials);
           cube.position.set(x, y, z);
+          // Store original position and rotation for reset
+          (cube as any).originalPosition = { x, y, z };
+          (cube as any).originalRotation = { x: 0, y: 0, z: 0 };
           scene.add(cube);
           cubies.push(cube);
         }

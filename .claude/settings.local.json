@@ -25,7 +25,8 @@
       "Bash(findstr :8081)",
       "Bash(taskkill *)",
       "Bash(curl -s \"http://localhost:8081/index.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable\")",
-      "Bash(git reset *)"
+      "Bash(git reset *)",
+      "Bash(identify \"C:\\\\Users\\\\Logan\\\\ClaudeProjects\\\\cubeProject\\\\public\\\\cube_background.jpg\")"
     ]
   }
 }
