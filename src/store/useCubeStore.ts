@@ -634,14 +634,21 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
 
       if (sliceCubies.length === 0) return;
 
+      // Get scene from first cubie's parent hierarchy
+      const scene = cubies[0].scene || (cubies[0].parent as any)?.scene;
+
       // Create a temporary parent group at the origin
       const parentGroup = new THREE.Group();
-      if (cubies[0].parent) {
-        cubies[0].parent.add(parentGroup);
+      if (scene) {
+        scene.add(parentGroup);
       }
+
+      // Store original parent for each cubie
+      const originalParents: (THREE.Object3D | null)[] = [];
 
       // Add each cubie to the parent group
       sliceCubies.forEach((cube) => {
+        originalParents.push(cube.parent);
         parentGroup.add(cube);
       });
 
@@ -654,12 +661,13 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       );
 
       // Restore cubies to their original parent
-      sliceCubies.forEach((cube) => {
+      sliceCubies.forEach((cube, i) => {
         if (cube.parent) {
           cube.parent.remove(cube);
         }
-        if (cubies[0].parent) {
-          cubies[0].parent.add(cube);
+
+        if (originalParents[i]) {
+          originalParents[i].add(cube);
         }
 
         // Get world position and rotation
@@ -685,8 +693,8 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
       });
 
       // Remove parent group
-      if (cubies[0].parent) {
-        cubies[0].parent.remove(parentGroup);
+      if (scene) {
+        scene.remove(parentGroup);
       }
     });
 
