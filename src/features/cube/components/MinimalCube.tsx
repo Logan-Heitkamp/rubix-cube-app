@@ -35,11 +35,7 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
 
     // Scene setup
     const scene = new THREE.Scene();
-
-    // Create checkerboard pattern from image
-    const textureLoader = new THREE.TextureLoader();
-    const checkerboardTexture = textureLoader.load('https://static.vecteezy.com/system/resources/previews/008/953/369/non_2x/transparent-background-png-texture-background-transparent-grid-free-vector.jpg');
-    scene.background = checkerboardTexture;
+    scene.background = new THREE.Color('#f0f0f0'); // Light grey background
     sceneRef.current = scene;
 
     // Get actual container dimensions for proper aspect ratio
