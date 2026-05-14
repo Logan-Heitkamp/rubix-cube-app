@@ -21,6 +21,7 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
   // Use refs to track rotation without causing re-renders
   const rotationRef = useRef({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
+  const lastMousePosRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -146,6 +147,75 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
     };
     window.addEventListener('resize', handleResize);
 
+    // Drag rotation handlers
+    const handleMouseDown = (e: MouseEvent) => {
+      isDraggingRef.current = true;
+      lastMousePosRef.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return;
+
+      const deltaX = e.clientX - lastMousePosRef.current.x;
+      const deltaY = e.clientY - lastMousePosRef.current.y;
+
+      const sensitivity = 0.5;
+      const newRotationX = rotationRef.current.x - deltaY * sensitivity;
+      const newRotationY = rotationRef.current.y + deltaX * sensitivity;
+
+      // Update rotation ref
+      rotationRef.current = { x: newRotationX, y: newRotationY };
+
+      // Update store
+      store.rotateFace(newRotationX, newRotationY);
+
+      lastMousePosRef.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false;
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        isDraggingRef.current = true;
+        lastMousePosRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDraggingRef.current || e.touches.length !== 1) return;
+
+      const deltaX = e.touches[0].clientX - lastMousePosRef.current.x;
+      const deltaY = e.touches[0].clientY - lastMousePosRef.current.y;
+
+      const sensitivity = 0.5;
+      const newRotationX = rotationRef.current.x - deltaY * sensitivity;
+      const newRotationY = rotationRef.current.y + deltaX * sensitivity;
+
+      // Update rotation ref
+      rotationRef.current = { x: newRotationX, y: newRotationY };
+
+      // Update store
+      store.rotateFace(newRotationX, newRotationY);
+
+      lastMousePosRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    };
+
+    const handleTouchEnd = () => {
+      isDraggingRef.current = false;
+    };
+
+    // Add event listeners to container
+    const canvas = containerRef.current;
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseup', handleMouseUp);
+    canvas.addEventListener('mouseleave', handleMouseUp);
+    canvas.addEventListener('touchstart', handleTouchStart);
+    canvas.addEventListener('touchmove', handleTouchMove);
+    canvas.addEventListener('touchend', handleTouchEnd);
+
     return () => {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationId);
@@ -153,6 +223,14 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
         rendererRef.current.dispose();
       }
       if (containerRef.current) {
+        const canvas = containerRef.current;
+        canvas.removeEventListener('mousedown', handleMouseDown);
+        canvas.removeEventListener('mousemove', handleMouseMove);
+        canvas.removeEventListener('mouseup', handleMouseUp);
+        canvas.removeEventListener('mouseleave', handleMouseUp);
+        canvas.removeEventListener('touchstart', handleTouchStart);
+        canvas.removeEventListener('touchmove', handleTouchMove);
+        canvas.removeEventListener('touchend', handleTouchEnd);
         containerRef.current.innerHTML = '';
       }
     };
@@ -160,20 +238,25 @@ export function MinimalCube({ showGrid = false }: MinimalCubeProps) {
 
   return (
     <View style={styles.container}>
-      <div ref={containerRef} style={styles.canvas} />
+      <div
+        ref={containerRef}
+        style={canvasStyle}
+      />
     </View>
   );
 }
+
+const canvasStyle: React.CSSProperties = {
+  width: '100%',
+  height: '100%',
+  overflow: 'hidden',
+  cursor: 'grab',
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
     height: '100%',
-  },
-  canvas: {
-    width: '100%',
-    height: '100%',
-    overflow: 'hidden',
   },
 });

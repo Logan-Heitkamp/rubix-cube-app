@@ -1,19 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import {
   View,
   StyleSheet,
-  PanResponder,
   TouchableOpacity,
   Text,
-  Dimensions,
 } from 'react-native';
 import { useCubeStore } from '../../store/useCubeStore';
 import { useThemeStore } from '../../store/useThemeStore';
 import { MinimalCube } from './components/MinimalCube';
 import { CubeRotationControls } from './components/CubeRotationControls';
 import { SplitView } from './components/SplitView';
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface CubeViewProps {
   showControls?: boolean;
@@ -29,40 +25,8 @@ export function CubeView({
   const store = useCubeStore();
   const themeStore = useThemeStore();
   const theme = themeStore.colors;
-  const state = store.state;
   const rotateFace = (x: number, y: number) => store.rotateFace(x, y);
   const setZoom = (zoom: number) => store.setZoom(zoom);
-
-  // Use refs for drag state to avoid re-renders
-  const dragStartRef = useRef({ x: 0, y: 0 });
-  const isDraggingRef = useRef(false);
-  const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        isDraggingRef.current = true;
-        dragStartRef.current = { x: touchStart.x, y: touchStart.y };
-      },
-      onPanResponderMove: (_, gesture) => {
-        if (!isDraggingRef.current) return;
-
-        const deltaX = gesture.dx;
-        const deltaY = gesture.dy;
-
-        const sensitivity = 0.3;
-        rotateFace(
-          state.rotation.x - deltaY * sensitivity,
-          state.rotation.y + deltaX * sensitivity
-        );
-      },
-      onPanResponderRelease: () => {
-        isDraggingRef.current = false;
-      },
-      onPanResponderTerminationRequest: () => true,
-    })
-  ).current;
 
   const resetRotation = () => {
     rotateFace(-25, 45);
@@ -85,16 +49,16 @@ export function CubeView({
         <View style={styles.zoomContainer}>
           <TouchableOpacity
             style={[styles.zoomButton, { backgroundColor: theme.surface }]}
-            onPress={() => setZoom(Math.max(5, state.zoom - 1))}
+            onPress={() => setZoom(Math.max(5, store.state.zoom - 1))}
           >
             <Text style={[styles.zoomText, { color: theme.text }]}>-</Text>
           </TouchableOpacity>
           <Text style={[styles.zoomLabel, { color: theme.text }]}>
-            {state.zoom.toFixed(1)}x
+            {store.state.zoom.toFixed(1)}x
           </Text>
           <TouchableOpacity
             style={[styles.zoomButton, { backgroundColor: theme.surface }]}
-            onPress={() => setZoom(Math.min(30, state.zoom + 1))}
+            onPress={() => setZoom(Math.min(30, store.state.zoom + 1))}
           >
             <Text style={[styles.zoomText, { color: theme.text }]}>+</Text>
           </TouchableOpacity>
@@ -128,8 +92,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   rightPane: {
     flex: 1,
