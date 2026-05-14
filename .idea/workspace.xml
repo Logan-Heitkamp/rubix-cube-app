@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="74091d7e-dab0-40a6-a058-345eee055b03" name="Changes" comment="" />
+    <list default="true" id="74091d7e-dab0-40a6-a058-345eee055b03" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/entities/moves.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/entities/moves.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -25,16 +28,16 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "e408fe8a",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Logan/ClaudeProjects/rubix-cube-app-new",
+    "last_opened_file_path": "C:/Users/Logan/ClaudeProjects/cubeProject",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "show.migrate.to.gradle.popup": "false",
-    "ts.external.directory.path": "C:\\Users\\Logan\\ClaudeProjects\\cubeProject\\node_modules\\typescript\\lib",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.2.0.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -56,6 +59,7 @@
       <updated>1778114856699</updated>
       <workItem from="1778114857781" duration="2448000" />
       <workItem from="1778691501517" duration="637000" />
+      <workItem from="1778771778801" duration="338000" />
     </task>
     <servers />
   </component>
