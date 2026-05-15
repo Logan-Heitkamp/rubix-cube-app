@@ -166,7 +166,10 @@ export function CubeView({
                 }
                 setSetupMoves(setupMovesInput);
                 setAlgorithmMoves(algorithmMovesInput);
-                playAlgorithm();
+                // Pause for 0.5 seconds before starting
+                setTimeout(() => {
+                  playAlgorithm();
+                }, 500);
               }}
               disabled={isAlgorithmPlaying}
             >
