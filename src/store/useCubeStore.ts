@@ -13,6 +13,8 @@ interface CubeStore {
   dispatch: (action: { type: string; payload?: FaceColors | { x: number; y: number }; move?: string }) => void;
   /** Reset cube to initial state */
   resetCube: () => void;
+  /** Reset cubies to initial positions and rotations only */
+  resetCubies: () => void;
   /** Rotate cube to specific angles */
   rotateFace: (x: number, y: number) => void;
   /** Set camera zoom level */
@@ -170,6 +172,26 @@ export const useCubeStore = create<CubeStore>()((set, get) => ({
         animationSpeed: 1,
       },
     });
+  },
+  resetCubies: () => {
+    const { cubies, scene } = get();
+    // Reset all cubies to original positions and rotations only
+    if (cubies.length > 0 && scene) {
+      cubies.forEach((cube) => {
+        const originalPos = (cube as any).originalPosition;
+        const originalRot = (cube as any).originalRotation;
+        if (originalPos) {
+          cube.position.set(originalPos.x, originalPos.y, originalPos.z);
+        } else {
+          cube.position.set(0, 0, 0);
+        }
+        if (originalRot) {
+          cube.rotation.set(originalRot.x, originalRot.y, originalRot.z);
+        } else {
+          cube.rotation.set(0, 0, 0);
+        }
+      });
+    }
   },
   rotateFace: (x, y) =>
     set((prev) => ({

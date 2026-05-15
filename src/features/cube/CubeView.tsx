@@ -21,6 +21,7 @@ export function CubeView({
   const theme = themeStore.colors;
   const turnMove = useCubeStore((s) => s.turnMove);
   const resetCube = useCubeStore((s) => s.resetCube);
+  const resetCubies = useCubeStore((s) => s.resetCubies);
   const setSetupMoves = useCubeStore((s) => s.setSetupMoves);
   const setAlgorithmMoves = useCubeStore((s) => s.setAlgorithmMoves);
   const playAlgorithm = useCubeStore((s) => s.playAlgorithm);
@@ -159,7 +160,7 @@ export function CubeView({
               style={[styles.playButton, { backgroundColor: theme.primary }]}
               onPress={() => {
                 // Apply setup moves immediately without debounce
-                resetCube();
+                resetCubies();
                 const setupMoves = setupMovesInput.trim().split(/\s+/).filter(m => m.length > 0);
                 if (setupMoves.length > 0) {
                   useCubeStore.getState().applyMovesToCubies(setupMoves);
