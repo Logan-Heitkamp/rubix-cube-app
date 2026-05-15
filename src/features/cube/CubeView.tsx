@@ -158,6 +158,8 @@ export function CubeView({
             <TouchableOpacity
               style={[styles.playButton, { backgroundColor: theme.primary }]}
               onPress={() => {
+                resetCube();
+                setSetupMoves(setupMovesInput);
                 setAlgorithmMoves(algorithmMovesInput);
                 playAlgorithm();
               }}
