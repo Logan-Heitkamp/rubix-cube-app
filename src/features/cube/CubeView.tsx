@@ -158,7 +158,12 @@ export function CubeView({
             <TouchableOpacity
               style={[styles.playButton, { backgroundColor: theme.primary }]}
               onPress={() => {
+                // Apply setup moves immediately without debounce
                 resetCube();
+                const setupMoves = setupMovesInput.trim().split(/\s+/).filter(m => m.length > 0);
+                if (setupMoves.length > 0) {
+                  useCubeStore.getState().applyMovesToCubies(setupMoves);
+                }
                 setSetupMoves(setupMovesInput);
                 setAlgorithmMoves(algorithmMovesInput);
                 playAlgorithm();
